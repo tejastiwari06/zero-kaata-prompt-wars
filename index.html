@@ -1,0 +1,4022 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight_neon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Zero Kaata — Production-Quality 3D Tic Tac Toe Platform. Every Move Changes Everything." />
+  <title>Zero Kaata — Every Move Changes Everything</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- React, ReactDOM, Babel for browser execution -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+  <!-- PeerJS for WebRTC P2P Real-Time Online Multiplayer -->
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="./src/styles/theme.css" />
+  <style>
+    /* Application Shell Styling */
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Top Nav Bar */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      margin-bottom: 24px;
+      gap: 16px;
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+      background: rgba(15, 20, 45, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(79, 110, 247, 0.22);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      max-width: 100%;
+      padding: 4px 0;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all var(--transition-fast);
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-btn.active {
+      color: var(--color-primary);
+      background: rgba(0, 243, 255, 0.08);
+      border-color: rgba(0, 243, 255, 0.3);
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.15);
+    }
+
+    /* Hero Banner matching Reference Image 1 */
+    .hero-banner-card {
+      background: linear-gradient(135deg, rgba(20, 26, 60, 0.75) 0%, rgba(10, 14, 34, 0.9) 100%);
+      border: 1.5px solid rgba(79, 110, 247, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      gap: 32px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-banner-card::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: 0%;
+      width: 460px;
+      height: 460px;
+      background: radial-gradient(circle, rgba(181, 55, 242, 0.2) 0%, rgba(0, 243, 255, 0.1) 40%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Game Board Arena */
+    .arena-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    /* Classic Board Grid */
+    .classic-board-grid {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .classic-board-grid.size-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .classic-board-grid.size-4 {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .classic-board-grid.size-5 {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    /* In-Game Reactions Dock */
+    .reactions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      background: rgba(18, 24, 52, 0.85);
+      border: 1.5px solid rgba(0, 243, 255, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .reaction-emoji-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .reaction-emoji-btn:hover {
+      transform: scale(1.4) translateY(-3px);
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--color-primary);
+      box-shadow: var(--glow-primary);
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+      animation: toast-in 0.3s ease-out;
+    }
+
+    @keyframes toast-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app-container { padding: 12px 14px 30px; }
+      .nav-bar { padding: 10px 14px; top: 0; border-radius: 0; margin-bottom: 16px; }
+      .hero-banner-card { flex-direction: column; text-align: center; padding: 24px 16px; }
+      .arena-stage-row { flex-direction: column; gap: 14px; }
+      .side-action-dock { flex-direction: row; }
+      .arena-top-bar { grid-template-columns: 1fr; gap: 10px; }
+    }
+
+    /* ==============================================================================
+       AI/ML KNOWLEDGE BATTLE COMPONENT STYLES
+       ============================================================================== */
+    .question-battle-card {
+      width: 100%;
+      max-width: 820px;
+      background: linear-gradient(135deg, rgba(16, 22, 52, 0.94) 0%, rgba(9, 13, 34, 0.98) 100%);
+      border: 1.5px solid rgba(0, 243, 255, 0.35);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 243, 255, 0.15);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      animation: qb-card-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .question-battle-card.urgency {
+      border-color: rgba(255, 51, 102, 0.7);
+      box-shadow: 0 0 28px rgba(255, 51, 102, 0.4);
+      animation: qb-pulse-urgency 0.8s infinite alternate;
+    }
+
+    @keyframes qb-pulse-urgency {
+      from { box-shadow: 0 0 15px rgba(255, 51, 102, 0.25); }
+      to { box-shadow: 0 0 35px rgba(255, 51, 102, 0.6); }
+    }
+
+    @keyframes qb-card-in {
+      from { opacity: 0; transform: translateY(-14px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .qb-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .qb-topic-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(0, 243, 255, 0.12);
+      border: 1px solid rgba(0, 243, 255, 0.4);
+      border-radius: var(--radius-full);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--color-primary);
+      text-transform: uppercase;
+    }
+
+    .qb-timer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      background: rgba(18, 24, 52, 0.9);
+      border: 1.5px solid rgba(0, 243, 255, 0.5);
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.2);
+    }
+
+    .qb-timer-pill.urgent {
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+      box-shadow: 0 0 14px rgba(255, 51, 102, 0.4);
+      animation: qb-timer-flash 0.5s infinite alternate;
+    }
+
+    @keyframes qb-timer-flash {
+      from { opacity: 0.8; }
+      to { opacity: 1; transform: scale(1.04); }
+    }
+
+    .qb-progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .qb-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+      transition: width 0.06s linear, background 0.3s ease;
+      border-radius: var(--radius-full);
+    }
+
+    .qb-progress-fill.urgent {
+      background: linear-gradient(90deg, #ff9900, var(--color-danger));
+    }
+
+    .qb-question-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: #ffffff;
+      margin-bottom: 18px;
+    }
+
+    .qb-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .qb-options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .qb-option-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(79, 110, 247, 0.25);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-main);
+      font-size: 0.88rem;
+      line-height: 1.35;
+      position: relative;
+    }
+
+    .qb-option-btn:hover:not(:disabled) {
+      background: rgba(0, 243, 255, 0.08);
+      border-color: rgba(0, 243, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0, 243, 255, 0.15);
+    }
+
+    .qb-option-btn.incorrect {
+      background: rgba(255, 51, 102, 0.18) !important;
+      border-color: var(--color-danger) !important;
+      color: #ff8da6 !important;
+      animation: qb-shake 0.35s ease-in-out;
+    }
+
+    @keyframes qb-shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .qb-option-btn.correct {
+      background: rgba(0, 255, 170, 0.18) !important;
+      border-color: var(--color-success) !important;
+      color: #00ffaa !important;
+      box-shadow: 0 0 18px rgba(0, 255, 170, 0.4);
+    }
+
+    .qb-option-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      font-weight: 800;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--color-primary);
+    }
+
+    .qb-status-banner {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      animation: qb-fade-in 0.25s ease-out;
+    }
+
+    @keyframes qb-fade-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .qb-status-banner.winner {
+      background: rgba(0, 255, 170, 0.12);
+      border: 1px solid var(--color-success);
+      color: var(--color-success);
+    }
+
+    .qb-status-banner.expired {
+      background: rgba(255, 184, 0, 0.12);
+      border: 1px solid var(--color-warning);
+      color: var(--color-warning);
+    }
+
+    .qb-status-banner.waiting {
+      background: rgba(79, 110, 247, 0.12);
+      border: 1px solid rgba(79, 110, 247, 0.3);
+      color: var(--text-muted);
+    }
+
+    .qb-explanation-box {
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.35);
+      border-left: 3px solid var(--color-primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    .qb-dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .qb-dual-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .qb-player-station {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+
+    .qb-station-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .board-permission-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      animation: qb-fade-in 0.25s ease-out;
+    }
+
+    .board-permission-pill.locked {
+      background: rgba(255, 51, 102, 0.12);
+      border: 1px solid rgba(255, 51, 102, 0.4);
+      color: #ff8da6;
+    }
+
+    .board-permission-pill.granted {
+      background: rgba(0, 255, 170, 0.15);
+      border: 1px solid var(--color-success);
+      color: var(--color-success);
+      box-shadow: 0 0 16px rgba(0, 255, 170, 0.3);
+    }
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Main Game Engine Scripts & React UI Bundle -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- EMBEDDED SOUND MANAGER (Pure Web Audio API Synthesizer) ---
+    class SoundManager {
+      static ctx = null;
+      static isMuted = false;
+      static masterVolume = 0.8;
+      static sfxVolume = 0.9;
+
+      static init() {
+        try {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+        } catch (e) {}
+      }
+
+      static getVol() {
+        return this.isMuted ? 0 : this.masterVolume * this.sfxVolume;
+      }
+
+      static playClick() {
+        try {
+          this.init();
+          if (!this.ctx || this.getVol() <= 0) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.04);
+          gain.gain.setValueAtTime(this.getVol() * 0.2, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.05);
+        } catch (e) {}
+      }
+
+      static playMove(isX) {
+        try {
+          this.init();
+          if (!this.ctx || this.getVol() <= 0) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = isX ? 'triangle' : 'sine';
+          const baseFreq = isX ? 587.33 : 440;
+          osc.frequency.setValueAtTime(baseFreq, now);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, now + 0.08);
+          gain.gain.setValueAtTime(this.getVol() * 0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } catch (e) {}
+      }
+
+      static playWin() {
+        try {
+          this.init();
+          if (!this.ctx || this.getVol() <= 0) return;
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          const now = this.ctx.currentTime;
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+            gain.gain.setValueAtTime(0, now + idx * 0.1);
+            gain.gain.linearRampToValueAtTime(this.getVol() * 0.4, now + idx * 0.1 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.1);
+            osc.stop(now + idx * 0.1 + 0.45);
+          });
+        } catch (e) {}
+      }
+
+      static playDraw() {
+        try {
+          this.init();
+          if (!this.ctx || this.getVol() <= 0) return;
+          const now = this.ctx.currentTime;
+          [440, 415.3, 392].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+            gain.gain.setValueAtTime(this.getVol() * 0.25, now + idx * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.3);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.1);
+            osc.stop(now + idx * 0.1 + 0.35);
+          });
+        } catch (e) {}
+      }
+
+      static playPowerUp() {
+        try {
+          this.init();
+          if (!this.ctx || this.getVol() <= 0) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
+          gain.gain.setValueAtTime(this.getVol() * 0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.36);
+        } catch (e) {}
+      }
+
+      static playReaction() {
+        try {
+          this.init();
+          if (!this.ctx || this.getVol() <= 0) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(650, now);
+          osc.frequency.exponentialRampToValueAtTime(980, now + 0.12);
+          gain.gain.setValueAtTime(this.getVol() * 0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } catch (e) {}
+      }
+
+      static playError() {
+        try {
+          this.init();
+          if (!this.ctx || this.getVol() <= 0) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.setValueAtTime(110, now + 0.07);
+          gain.gain.setValueAtTime(this.getVol() * 0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } catch (e) {}
+      }
+    }
+
+    // --- GAME ENGINE RULES ---
+    class GameEngine {
+      static getWinningLines(size = 3, winStreak = size) {
+        const lines = [];
+        // Horizontal
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c <= size - winStreak; c++) {
+            const line = [];
+            for (let k = 0; k < winStreak; k++) line.push(r * size + (c + k));
+            lines.push(line);
+          }
+        }
+        // Vertical
+        for (let c = 0; c < size; c++) {
+          for (let r = 0; r <= size - winStreak; r++) {
+            const line = [];
+            for (let k = 0; k < winStreak; k++) line.push((r + k) * size + c);
+            lines.push(line);
+          }
+        }
+        // Diagonals
+        for (let r = 0; r <= size - winStreak; r++) {
+          for (let c = 0; c <= size - winStreak; c++) {
+            const line = [];
+            for (let k = 0; k < winStreak; k++) line.push((r + k) * size + (c + k));
+            lines.push(line);
+          }
+        }
+        // Anti-diagonals
+        for (let r = 0; r <= size - winStreak; r++) {
+          for (let c = winStreak - 1; c < size; c++) {
+            const line = [];
+            for (let k = 0; k < winStreak; k++) line.push((r + k) * size + (c - k));
+            lines.push(line);
+          }
+        }
+        return lines;
+      }
+
+      static checkWinner(board, size = 3, winStreak = size) {
+        const lines = this.getWinningLines(size, winStreak);
+        for (const line of lines) {
+          const first = board[line[0]];
+          if (!first) continue;
+          let match = true;
+          for (let i = 1; i < line.length; i++) {
+            if (board[line[i]] !== first) { match = false; break; }
+          }
+          if (match) {
+            let direction = 'horizontal';
+            const [a, b] = [line[0], line[1]];
+            if (Math.floor(a / size) === Math.floor(b / size)) direction = 'horizontal';
+            else if (a % size === b % size) direction = 'vertical';
+            else if (b - a === size + 1) direction = 'diagonal_main';
+            else direction = 'diagonal_anti';
+            return { winner: first, winningLine: { indices: line, direction } };
+          }
+        }
+        return { winner: null, winningLine: null };
+      }
+
+      static isFull(board) {
+        return board.every(c => c !== null);
+      }
+
+      static getLegalMoves(board, restricted = []) {
+        const legal = [];
+        const resSet = new Set(restricted);
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === null && !resSet.has(i)) legal.push(i);
+        }
+        return legal;
+      }
+    }
+
+    // --- MINIMAX AI ENGINE (Unbeatable Alpha-Beta) ---
+    class MinimaxAI {
+      static getMove(board, size, aiSym, oppSym, difficulty, winStreak = size, restricted = []) {
+        const legal = GameEngine.getLegalMoves(board, restricted);
+        if (legal.length === 0) return -1;
+        if (legal.length === 1) return legal[0];
+
+        if (difficulty === 'easy') {
+          return legal[Math.floor(Math.random() * legal.length)];
+        }
+
+        if (difficulty === 'medium') {
+          const winMove = this.findWinningMove(board, legal, aiSym, size, winStreak);
+          if (winMove !== -1) return winMove;
+          const blockMove = this.findWinningMove(board, legal, oppSym, size, winStreak);
+          if (blockMove !== -1) return blockMove;
+          if (size === 3 && legal.includes(4)) return 4;
+          return legal[Math.floor(Math.random() * legal.length)];
+        }
+
+        if (difficulty === 'hard') {
+          const winMove = this.findWinningMove(board, legal, aiSym, size, winStreak);
+          if (winMove !== -1) return winMove;
+          const blockMove = this.findWinningMove(board, legal, oppSym, size, winStreak);
+          if (blockMove !== -1) return blockMove;
+          const center = Math.floor((size * size) / 2);
+          if (legal.includes(center)) return center;
+          const corners = [0, size - 1, size * (size - 1), size * size - 1].filter(c => legal.includes(c));
+          if (corners.length > 0) return corners[Math.floor(Math.random() * corners.length)];
+          return legal[Math.floor(Math.random() * legal.length)];
+        }
+
+        // IMPOSSIBLE MINIMAX
+        const center = Math.floor((size * size) / 2);
+        if (size === 3 && legal.length >= 8 && legal.includes(center)) return center;
+
+        let bestScore = -Infinity;
+        let bestMove = legal[0];
+        const maxDepth = size === 3 ? 9 : 4;
+
+        for (const move of legal) {
+          board[move] = aiSym;
+          const score = this.minimax(board, 0, false, -Infinity, Infinity, aiSym, oppSym, size, winStreak, maxDepth);
+          board[move] = null;
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+          }
+        }
+        return bestMove;
+      }
+
+      static minimax(board, depth, isMax, alpha, beta, aiSym, oppSym, size, winStreak, maxDepth) {
+        const { winner } = GameEngine.checkWinner(board, size, winStreak);
+        if (winner === aiSym) return 100 - depth;
+        if (winner === oppSym) return depth - 100;
+        if (GameEngine.isFull(board) || depth >= maxDepth) return 0;
+
+        const legal = GameEngine.getLegalMoves(board);
+        if (isMax) {
+          let maxEval = -Infinity;
+          for (const move of legal) {
+            board[move] = aiSym;
+            const evalScore = this.minimax(board, depth + 1, false, alpha, beta, aiSym, oppSym, size, winStreak, maxDepth);
+            board[move] = null;
+            maxEval = Math.max(maxEval, evalScore);
+            alpha = Math.max(alpha, evalScore);
+            if (beta <= alpha) break;
+          }
+          return maxEval;
+        } else {
+          let minEval = Infinity;
+          for (const move of legal) {
+            board[move] = oppSym;
+            const evalScore = this.minimax(board, depth + 1, true, alpha, beta, aiSym, oppSym, size, winStreak, maxDepth);
+            board[move] = null;
+            minEval = Math.min(minEval, evalScore);
+            beta = Math.min(beta, evalScore);
+            if (beta <= alpha) break;
+          }
+          return minEval;
+        }
+      }
+
+      static findWinningMove(board, legal, sym, size, winStreak) {
+        for (const m of legal) {
+          board[m] = sym;
+          const { winner } = GameEngine.checkWinner(board, size, winStreak);
+          board[m] = null;
+          if (winner === sym) return m;
+        }
+        return -1;
+      }
+    }
+
+    // --- CURATED TACTICAL PUZZLES ---
+    const TACTICAL_PUZZLES = [
+      {
+        id: 'p1',
+        title: 'Precision Strike',
+        objective: 'Deliver the finishing blow in a single move.',
+        difficulty: 'Beginner',
+        initial: ['X', 'X', null, 'O', 'O', null, null, null, null],
+        playerSym: 'X',
+        oppSym: 'O',
+        solution: 2,
+        hint: 'Inspect the top row. The horizontal victory corridor is open!',
+        xp: 100,
+      },
+      {
+        id: 'p2',
+        title: 'Defensive Firewall',
+        objective: 'Opponent threatens a winning line on the left. Block it!',
+        difficulty: 'Beginner',
+        initial: ['O', null, 'X', 'O', 'X', null, null, null, null],
+        playerSym: 'X',
+        oppSym: 'O',
+        solution: 6,
+        hint: 'Look at Column 1 (cells 0, 3, 6). Opponent is one move away from victory.',
+        xp: 120,
+      },
+      {
+        id: 'p3',
+        title: 'The Dual Threat Fork',
+        objective: 'Create a fork opening two simultaneous winning paths!',
+        difficulty: 'Intermediate',
+        initial: ['X', null, null, null, 'O', null, null, null, 'X'],
+        playerSym: 'X',
+        oppSym: 'O',
+        solution: 2,
+        hint: 'Seize one of the unoccupied corner cells to threaten both horizontal and vertical lines.',
+        xp: 150,
+      },
+      {
+        id: 'p4',
+        title: 'Anti-Diagonal Ambush',
+        objective: 'Spot the disguised diagonal sequence for an instant win.',
+        difficulty: 'Intermediate',
+        initial: [null, 'O', 'X', 'O', 'X', null, null, null, null],
+        playerSym: 'X',
+        oppSym: 'O',
+        solution: 6,
+        hint: 'Trace from top-right (2) through center (4) to bottom-left (6).',
+        xp: 180,
+      },
+    ];
+
+    // ==============================================================================
+    // AI/ML KNOWLEDGE BATTLE: HIGH-CALIBER QUESTION REPOSITORY & PROCEDURAL ENGINE
+    // ==============================================================================
+    class AIMLQuestionEngine {
+      static CURATED_QUESTIONS = [
+        {
+          id: 'ml_q1',
+          topic: 'Contrastive Learning',
+          difficulty: 'Research',
+          question: 'Why does contrastive learning (e.g., SimCLR NT-Xent loss) benefit critically from temperature scaling tau in the softmax denominator?',
+          options: {
+            A: 'It prevents the gradient of hard negatives from vanishing by tuning distribution sharpness.',
+            B: 'It guarantees that representation norms collapse to a single uniform point on the hypersphere.',
+            C: 'It eliminates the requirement of computing negative pair dot-products.',
+            D: 'It strictly enforces zero cosine distance between orthogonal latent vectors.'
+          },
+          answer: 'A',
+          explanation: 'Temperature tau controls sensitivity to hard negative samples: lower tau penalizes hard negatives more aggressively, preventing uniform representation collapse while maintaining gradient signal.'
+        },
+        {
+          id: 'ml_q2',
+          topic: 'Transformers & Attention',
+          difficulty: 'Advanced',
+          question: 'In FlashAttention-2, what key algorithmic insight enables a ~2-4x speedup over standard Multi-Head Attention on modern GPUs?',
+          options: {
+            A: 'Replacing the softmax nonlinearity with a piecewise linear ReLU approximation.',
+            B: 'Tiling inputs into SRAM blocks and online softmax scaling to avoid materializing the full N x N matrix in HBM.',
+            C: 'Pruning 75% of query-key inner products based on magnitude thresholding.',
+            D: 'Distributing query projections across CPU threads via asynchronous PCI-e DMA transfers.'
+          },
+          answer: 'B',
+          explanation: 'FlashAttention computes exact attention by tiling Q, K, and V into fast GPU SRAM, maintaining running softmax normalization statistics (online softmax) without writing intermediate N x N attention matrix to slow HBM.'
+        },
+        {
+          id: 'ml_q3',
+          topic: 'Deep Learning Optimization',
+          difficulty: 'Advanced',
+          question: 'In the Adam optimizer, why are first (m_t) and second (v_t) moment estimates corrected by (1 - beta_1^t) and (1 - beta_2^t)?',
+          options: {
+            A: 'To regularize weight decay linearly with the current epoch step count.',
+            B: 'To eliminate the initialization bias toward zero during early optimization steps.',
+            C: 'To dynamically modulate the learning rate according to spectral norm upper bounds.',
+            D: 'To enforce orthogonal updates across distinct parameter sub-tensors.'
+          },
+          answer: 'B',
+          explanation: 'Since m_0 and v_0 are initialized to zero, exponential moving averages are heavily biased toward zero in early iterations. Dividing by (1 - beta^t) yields unbiased estimators since E[m_t] = E[g_t].'
+        },
+        {
+          id: 'ml_q4',
+          topic: 'Parameter-Efficient Fine-Tuning',
+          difficulty: 'Advanced',
+          question: 'In Low-Rank Adaptation (LoRA), how are adapter weight matrices A in R^{r x d_in} and B in R^{d_out x r} typically initialized before fine-tuning?',
+          options: {
+            A: 'Both A and B are initialized to identity matrices I_r.',
+            B: 'Both A and B are initialized with zero vectors.',
+            C: 'A is initialized with Gaussian noise and B is initialized to zero, so Delta W = B*A = 0 at step 0.',
+            D: 'A is initialized to zero and B is initialized with Xavier uniform noise.'
+          },
+          answer: 'C',
+          explanation: 'Setting B = 0 and A ~ N(0, sigma^2) ensures that the perturbation Delta W = B * A is strictly zero at the beginning of training, preserving the pre-trained model outputs.'
+        },
+        {
+          id: 'ml_q5',
+          topic: 'Deep Learning Architectures',
+          difficulty: 'Advanced',
+          question: 'What is the primary operational difference between Layer Normalization (LayerNorm) and Batch Normalization (BatchNorm) at inference time?',
+          options: {
+            A: 'LayerNorm requires caching running population statistics, whereas BatchNorm computes them dynamically.',
+            B: 'BatchNorm uses fixed running mean/variance tracked during training, whereas LayerNorm computes statistics per sample across channels/features dynamically.',
+            C: 'LayerNorm is strictly restricted to 1D signals and cannot normalize spatial activations.',
+            D: 'BatchNorm normalizes across hidden feature dimensions independently for each sequence token.'
+          },
+          answer: 'B',
+          explanation: 'BatchNorm uses frozen running mean and variance vectors accumulated during training at inference. LayerNorm computes mean and variance dynamically on each individual sample across feature dimensions, independent of batch size.'
+        },
+        {
+          id: 'ml_q6',
+          topic: 'Reinforcement Learning & Alignment',
+          difficulty: 'Research',
+          question: 'In Direct Preference Optimization (DPO), how is the policy objective derived from traditional RLHF with a Bradley-Terry reward model?',
+          options: {
+            A: 'By training an explicit neural reward model and taking Monte Carlo policy rollouts.',
+            B: 'By expressing the ground-truth reward analytically as the implicit log-ratio of policy to reference probabilities: r(x,y) = beta * log(pi_theta(y|x) / pi_ref(y|x)).',
+            C: 'By replacing cross-entropy loss with mean squared error over preferred token logits.',
+            D: 'By optimizing actor-critic networks using Generalized Advantage Estimation over human ranking scores.'
+          },
+          answer: 'B',
+          explanation: 'DPO uses the closed-form relationship between optimal policy and reward function in Bradley-Terry preference models, substituting r(x,y) = beta * log(pi / pi_ref) directly into the loss, completely bypassing explicit reward modeling.'
+        },
+        {
+          id: 'ml_q7',
+          topic: 'Mathematics of Machine Learning',
+          difficulty: 'Research',
+          question: 'For two continuous probability distributions P and Q, what does the Kullback-Leibler divergence D_KL(P || Q) quantify, and what is its symmetry property?',
+          options: {
+            A: 'It is a symmetric Euclidean metric quantifying the geometric distance between covariance matrices.',
+            B: 'It quantifies the relative entropy (information loss) when using Q to approximate P; it is non-negative and generally asymmetric.',
+            C: 'It measures the total variation bounded between -1 and +1, satisfying the triangle inequality.',
+            D: 'It computes the cosine angle between probability density gradient vectors on a Riemannian manifold.'
+          },
+          answer: 'B',
+          explanation: 'KL divergence D_KL(P || Q) = int P(x) log(P(x)/Q(x)) dx measures expected information loss using distribution Q to approximate true distribution P. By Gibbs inequality, D_KL(P || Q) >= 0, with equality iff P = Q almost everywhere; in general D_KL(P || Q) != D_KL(Q || P).'
+        },
+        {
+          id: 'ml_q8',
+          topic: 'Machine Learning Theory',
+          difficulty: 'Advanced',
+          question: 'Why does L1 (Lasso) regularization induce sparse weights whereas L2 (Ridge) regularization yields diffuse, non-zero weights?',
+          options: {
+            A: 'L1 penalizes small weights more gently than large weights.',
+            B: 'The L1 norm is non-differentiable at w_i = 0 with a subgradient interval [-lambda, lambda], causing contours to hit coordinate axes at vertices.',
+            C: 'L2 regularization eliminates gradient flow whenever weights become negative.',
+            D: 'L1 optimization requires solving closed-form normal equations directly.'
+          },
+          answer: 'B',
+          explanation: 'The L1 diamond-shaped constraint region has sharp corners on the coordinate axes where gradients have non-zero subgradient components, pushing non-critical weights exactly to zero.'
+        },
+        {
+          id: 'ml_q9',
+          topic: 'Transformers & Positional Encodings',
+          difficulty: 'Advanced',
+          question: 'What mathematical property of Rotary Position Embedding (RoPE) ensures relative position awareness in Multi-Head Attention?',
+          options: {
+            A: 'The inner product <R_m q, R_n k> depends strictly on the relative distance (m - n) via a complex rotation matrix.',
+            B: 'It adds learnable sinusoidal bias vectors directly to the feedforward activation tensors.',
+            C: 'It masks attention scores exponentially based on absolute token indices.',
+            D: 'It projects query and key vectors onto Chebyshev polynomial orthogonal bases.'
+          },
+          answer: 'A',
+          explanation: 'RoPE applies an orthogonal block-diagonal rotation matrix R_m to queries and R_n to keys. In complex coordinates, <R_m q, R_n k> = Re[q* (R_{m-n} k)], so attention scores depend purely on relative offset (m - n).'
+        },
+        {
+          id: 'ml_q10',
+          topic: 'Quantization & Model Compression',
+          difficulty: 'Advanced',
+          question: 'In asymmetric uniform 8-bit integer quantization, how are real-valued tensor values x converted to quantized integers q in [0, 255]?',
+          options: {
+            A: 'q = round(x * 128) + 127',
+            B: 'q = clamp(round(x / S) + Z, 0, 255) where S is scale and Z is integer zero-point.',
+            C: 'q = floor(log2(abs(x))) * sign(x)',
+            D: 'q = round(softmax(x) * 255)'
+          },
+          answer: 'B',
+          explanation: 'Asymmetric quantization maps [x_min, x_max] to [0, 255] using scale S = (x_max - x_min) / 255 and integer zero-point Z = round(-x_min / S), computed as q = clamp(round(x / S) + Z, 0, 255).'
+        },
+        {
+          id: 'ml_q11',
+          topic: 'Deep Learning Architectures',
+          difficulty: 'Advanced',
+          question: 'What is the theoretical justification for the residual connection x + F(x) in ResNets preventing vanishing gradients?',
+          options: {
+            A: 'It multiplies the gradient Jacobian by an orthogonal unitary factor at every layer.',
+            B: 'The gradient dE/dx = dE/dy * (I + dF/dx) includes an identity term I, ensuring a clean highway for gradient propagation regardless of dF/dx.',
+            C: 'It replaces non-convex loss surfaces with strictly quadratic bowls.',
+            D: 'It constrains all weight eigenvalues to lie strictly inside the complex unit circle.'
+          },
+          answer: 'B',
+          explanation: 'By the chain rule, dE/dx_l = dE/dx_L * (I + sum dF/dx), so gradients can flow directly from output layer L back to shallow layer l without vanishing exponentially through repeated matrix multiplications.'
+        },
+        {
+          id: 'ml_q12',
+          topic: 'Information Retrieval & RAG',
+          difficulty: 'Advanced',
+          question: 'In dense vector retrieval for RAG, why is Maximum Inner Product Search (MIPS) equivalent to nearest neighbor search under Euclidean distance when embeddings are L2-normalized?',
+          options: {
+            A: 'Because ||u - v||^2 = ||u||^2 + ||v||^2 - 2<u, v> = 2 - 2<u, v>, so maximizing <u, v> minimizes Euclidean distance.',
+            B: 'Because L2 normalization forces all vector dot products to zero.',
+            C: 'Because high-dimensional spheres possess zero intrinsic curvature.',
+            D: 'Because the cosine similarity matrix becomes strictly diagonally dominant.'
+          },
+          answer: 'A',
+          explanation: 'When ||u|| = ||v|| = 1, ||u - v||^2 = 2 - 2(u . v). Thus, maximizing the dot product u . v directly minimizes ||u - v||^2, making MIPS and L2 Euclidean nearest neighbors mathematically identical.'
+        },
+        {
+          id: 'ml_q13',
+          topic: 'Mathematics of AI: Linear Algebra',
+          difficulty: 'Advanced',
+          question: 'According to the Eckart-Young-Mirsky Theorem, what is the optimal rank-k approximation of a matrix A under the Frobenius norm?',
+          options: {
+            A: 'A_k = sum_{i=1}^k sigma_i u_i v_i^T, obtained by truncating the Singular Value Decomposition to the top k singular values.',
+            B: 'The Cholesky factorization L * L^T evaluated at the k-th diagonal pivot.',
+            C: 'The QR decomposition Q_k * R_k computed with Householder reflectors.',
+            D: 'The diagonal projection matrix diag(A) scaled by the top-k trace elements.'
+          },
+          answer: 'A',
+          explanation: 'The Eckart-Young-Mirsky Theorem proves that the truncated SVD A_k = sum_{i=1}^k sigma_i u_i v_i^T minimizes ||A - B||_F over all matrices B of rank at most k.'
+        },
+        {
+          id: 'ml_q14',
+          topic: 'Deep Learning: Attention Mechanisms',
+          difficulty: 'Advanced',
+          question: 'What distinguishes Grouped-Query Attention (GQA) from Multi-Head Attention (MHA) and Multi-Query Attention (MQA)?',
+          options: {
+            A: 'GQA groups tokens across temporal sequence windows rather than head dimensions.',
+            B: 'GQA divides H query heads into G groups, with all query heads in each group sharing a single Key and Value head, balancing speed and expressivity.',
+            C: 'GQA replaces dot-product attention with group convolution filters.',
+            D: 'GQA computes attention weights only between adjacent token clusters.'
+          },
+          answer: 'B',
+          explanation: 'MHA uses 1 KV head per Q head; MQA shares 1 single KV head across all Q heads. GQA interpolates between them: G query groups share KV heads, significantly reducing KV cache memory while maintaining MHA-like accuracy.'
+        },
+        {
+          id: 'ml_q15',
+          topic: 'Optimization & Numerical Stability',
+          difficulty: 'Research',
+          question: 'In deep network loss functions, why is Cross-Entropy formulated using log-sum-exp stabilization instead of naive computation of exp(z_i) / sum exp(z_j)?',
+          options: {
+            A: 'Subtracting max(z) before exp prevents numerical overflow (inf) while adding a log shift prevents underflow to 0.',
+            B: 'It reduces the asymptotic complexity of softmax from O(N) to O(log N).',
+            C: 'It forces logits to be strictly orthogonal to the ground-truth one-hot label.',
+            D: 'It removes negative eigenvalues from the loss Hessian matrix.'
+          },
+          answer: 'A',
+          explanation: 'For large logits z_i, exp(z_i) overflows 32-bit floats to inf (yielding NaN). The identity log(sum exp(z_i)) = c + log(sum exp(z_i - c)) with c = max(z) guarantees all exponents <= 0, preventing overflow.'
+        },
+        {
+          id: 'ml_q16',
+          topic: 'Machine Learning Evaluation',
+          difficulty: 'Advanced',
+          question: 'In an extreme class-imbalanced binary classification setting (99.9% negative, 0.1% positive), why is the Precision-Recall AUC (PR-AUC) preferred over ROC-AUC?',
+          options: {
+            A: 'ROC-AUC cannot be calculated if the true negative count is non-zero.',
+            B: 'The True Negative Rate (specificity) in the ROC denominator is dominated by huge negative counts, masking large numbers of false positives.',
+            C: 'PR-AUC is invariant to monotonic probability calibration scaling.',
+            D: 'ROC-AUC strictly penalizes precision drops more severely than recall drops.'
+          },
+          answer: 'B',
+          explanation: 'In ROC, False Positive Rate = FP / (FP + TN). When TN is huge, FPR remains deceptively tiny even if FP is orders of magnitude larger than TP. PR-AUC focuses on Precision = TP / (TP + FP) and Recall, explicitly exposing false positives.'
+        },
+        {
+          id: 'ml_q17',
+          topic: 'Generative AI: Diffusion Models',
+          difficulty: 'Research',
+          question: 'In Denoising Diffusion Probabilistic Models (DDPM), what is the primary purpose of the reparameterization trick during forward diffusion sampling at arbitrary timestep t?',
+          options: {
+            A: 'Sampling x_t in closed form directly from x_0 via x_t = sqrt(alpha_bar_t)*x_0 + sqrt(1 - alpha_bar_t)*epsilon without iterative Markov steps.',
+            B: 'Enforcing the noise schedule to strictly follow a deterministic Gaussian mixture.',
+            C: 'Preventing the score function from depending on spatial image gradients.',
+            D: 'Eliminating the variational lower bound computation during training.'
+          },
+          answer: 'A',
+          explanation: 'Due to the composition of Gaussian distributions, the forward marginal q(x_t | x_0) can be computed in closed form at any arbitrary timestep t without simulating the Markov chain step-by-step from 1 to t.'
+        },
+        {
+          id: 'ml_q18',
+          topic: 'Reinforcement Learning: Policy Gradients',
+          difficulty: 'Advanced',
+          question: 'In Proximal Policy Optimization (PPO), what is the role of the clipped surrogate objective L^{CLIP}(theta)?',
+          options: {
+            A: 'It prevents overly large policy updates by clipping probability ratios r_t(theta) outside [1 - epsilon, 1 + epsilon] when advantage is positive or negative.',
+            B: 'It clips state observation vectors to zero-mean unit variance.',
+            C: 'It guarantees that policy entropy is strictly non-decreasing over training epochs.',
+            D: 'It replaces Generalized Advantage Estimation with tabular Q-learning.'
+          },
+          answer: 'A',
+          explanation: 'PPO clips the probability ratio r_t(theta) = pi_theta(a|s) / pi_old(a|s) to [1-eps, 1+eps], taking the minimum with the unclipped objective to penalize destructive policy updates while retaining first-order optimization efficiency.'
+        },
+        {
+          id: 'ml_q19',
+          topic: 'Deep Learning: Weight Initialization',
+          difficulty: 'Advanced',
+          question: 'Why does Kaiming (He) initialization use Var(W) = 2 / n_in instead of Xavier (Glorot) initialization Var(W) = 2 / (n_in + n_out) for networks with ReLU activations?',
+          options: {
+            A: 'Because ReLU sets roughly half the activations to zero, halving the variance at each forward layer.',
+            B: 'Because ReLU causes activations to double in magnitude at every linear projection.',
+            C: 'Because Xavier initialization is strictly invalid for complex-valued weights.',
+            D: 'Because Kaiming initialization regularizes the spectral norm to 0.5.'
+          },
+          answer: 'A',
+          explanation: 'Because ReLU(x) = max(0, x) outputs zero for negative inputs, under symmetric zero-mean assumptions roughly half the units are inactive, effectively halving variance. Multiplying variance by 2 restores activation variance across layers.'
+        },
+        {
+          id: 'ml_q20',
+          topic: 'Distributed Training & Systems',
+          difficulty: 'Advanced Systems',
+          question: 'In Zero Redundancy Optimizer Stage 3 (ZeRO-3), how are model states partitioned across data-parallel ranks to fit 100B+ parameter models?',
+          options: {
+            A: 'Only optimizer states are partitioned; gradients and parameters are replicated.',
+            B: 'Optimizer states, gradients, and model parameters are all partitioned across ranks and gathered via all-gather right before forward/backward execution.',
+            C: 'Weights are offloaded strictly to CPU RAM via PCIe and never stored in GPU VRAM.',
+            D: 'Layers are split across distinct pipeline stages with 1F1B schedule.'
+          },
+          answer: 'B',
+          explanation: 'ZeRO Stage 1 partitions optimizer states; Stage 2 partitions gradients; Stage 3 partitions all model parameters across data-parallel ranks, dynamically fetching weights via all-gather and discarding them immediately after each layer computation.'
+        },
+        {
+          id: 'ml_q21',
+          topic: 'Information Theory & Entropy',
+          difficulty: 'Research',
+          question: 'What distribution maximizes differential entropy over continuous random variables supported on (-inf, +inf) for a fixed mean and variance sigma^2?',
+          options: {
+            A: 'Uniform distribution on [-sqrt(3)*sigma, sqrt(3)*sigma]',
+            B: 'Gaussian (Normal) distribution N(mu, sigma^2)',
+            C: 'Laplace distribution with scale b = sigma / sqrt(2)',
+            D: 'Cauchy distribution with scale gamma = sigma'
+          },
+          answer: 'B',
+          explanation: 'By the maximum entropy principle using Lagrange multipliers with constraints on normalization and second moment, the Gaussian distribution uniquely maximizes differential entropy over the entire real line.'
+        },
+        {
+          id: 'ml_q22',
+          topic: 'Self-Supervised Learning',
+          difficulty: 'Advanced',
+          question: 'In Masked Autoencoders (MAE), why can the ViT encoder process only a small fraction (e.g. 25%) of visible image patches, while standard BERT must process 100% of tokens?',
+          options: {
+            A: 'MAE completely deletes masked patch tokens before feeding them to the encoder, processing only unmasked tokens to save compute.',
+            B: 'Images have lower spatial dimensionality than natural language tokens.',
+            C: 'MAE uses 2D spatial convolution instead of self-attention.',
+            D: 'Visible patches are merged using pixel average pooling.'
+          },
+          answer: 'A',
+          explanation: 'MAE discards masked patches completely during the heavy encoder pass, executing self-attention only on the 25% visible patches. Mask tokens are only introduced in the lightweight decoder, yielding ~4x compute savings.'
+        },
+        {
+          id: 'ml_q23',
+          topic: 'Mathematics: Optimization',
+          difficulty: 'Advanced Mathematical',
+          question: 'Under what condition does gradient descent with step size eta converge for a beta-smooth convex function f(x)?',
+          options: {
+            A: '0 < eta < 2 / beta',
+            B: 'eta >= beta / 2',
+            C: 'eta = beta^2',
+            D: 'eta < 1 / (2 * beta^2)'
+          },
+          answer: 'A',
+          explanation: 'For a beta-smooth convex function (Lipschitz continuous gradient with constant beta), standard descent lemma proves that gradient descent is guaranteed to monotonically decrease the objective whenever 0 < eta < 2 / beta.'
+        },
+        {
+          id: 'ml_q24',
+          topic: 'Model Distillation',
+          difficulty: 'Advanced',
+          question: 'In Hinton-style knowledge distillation, what is the role of temperature T in the teacher and student softened softmax distributions?',
+          options: {
+            A: 'Higher T softens probabilities, revealing rich "dark knowledge" (relative similarities across negative non-target classes).',
+            B: 'Higher T drives the output toward a discrete one-hot vector.',
+            C: 'Lower T prevents the student gradients from overflowing.',
+            D: 'T scales the learning rate exponentially with model depth.'
+          },
+          answer: 'A',
+          explanation: 'At T=1, probabilities of incorrect classes are nearly zero. Elevating T softens the distribution, revealing the rich structural similarities between classes that the teacher model discovered.'
+        }
+      ];
+
+      // Procedural Generation: Produces mathematically verified, non-repeating technical questions
+      static PROCEDURAL_GENERATORS = [
+        // Generator 1: LoRA Parameter Count
+        (seed) => {
+          const dModels = [768, 1024, 2048, 4096];
+          const ranks = [4, 8, 16, 32];
+          const layers = [16, 24, 32];
+          const d = dModels[seed % dModels.length];
+          const r = ranks[(seed >> 2) % ranks.length];
+          const L = layers[(seed >> 4) % layers.length];
+          const correctParams = 2 * L * (2 * d * r);
+          const distractor1 = L * (2 * d * r);
+          const distractor2 = 2 * L * (d * d);
+          const distractor3 = 2 * L * (d * r);
+
+          const qId = `proc_lora_${d}_${r}_${L}`;
+          return {
+            id: qId,
+            topic: 'Parameter-Efficient Fine-Tuning',
+            difficulty: 'Advanced Numerical',
+            question: `A transformer model has hidden dimension d = ${d} and L = ${L} layers. You apply LoRA with rank r = ${r} exclusively to Query and Value projection matrices. What is the total count of trainable LoRA parameters?`,
+            options: {
+              A: `${correctParams.toLocaleString()} parameters`,
+              B: `${distractor1.toLocaleString()} parameters`,
+              C: `${distractor2.toLocaleString()} parameters`,
+              D: `${distractor3.toLocaleString()} parameters`
+            },
+            answer: 'A',
+            explanation: `For each of the ${L} layers, Q and V each require adapter matrices A (d x r) and B (r x d) totaling 2 * ${d} * ${r} = ${2 * d * r} params. For 2 matrices across ${L} layers: 2 * ${L} * (2 * ${d} * ${r}) = ${correctParams.toLocaleString()} parameters.`
+          };
+        },
+
+        // Generator 2: KV Cache Memory Sizing
+        (seed) => {
+          const batchSizes = [1, 4, 8, 16];
+          const seqLens = [1024, 2048, 4096];
+          const layers = [24, 32];
+          const d = 4096;
+          const b = batchSizes[seed % batchSizes.length];
+          const s = seqLens[(seed >> 2) % seqLens.length];
+          const L = layers[(seed >> 4) % layers.length];
+          const bytesTotal = 2 * b * s * L * d * 2;
+          const mbTotal = Math.round(bytesTotal / (1024 * 1024));
+          const mbDistractor1 = Math.round(mbTotal / 2);
+          const mbDistractor2 = Math.round(mbTotal * 2);
+          const mbDistractor3 = Math.round(mbTotal * 1.5);
+
+          const qId = `proc_kv_${b}_${s}_${L}`;
+          return {
+            id: qId,
+            topic: 'LLM Systems & Inference',
+            difficulty: 'Advanced Systems',
+            question: `For a transformer with hidden size d = ${d}, L = ${L} layers in FP16 (2 bytes/elem), what is the exact KV cache memory allocated for a batch size B = ${b} and context length S = ${s}?`,
+            options: {
+              A: `~${mbTotal} MB`,
+              B: `~${mbDistractor1} MB`,
+              C: `~${mbDistractor2} MB`,
+              D: `~${mbDistractor3} MB`
+            },
+            answer: 'A',
+            explanation: `Memory = 2 (Key + Value) * B * S * L * d * 2 bytes = 2 * ${b} * ${s} * ${L} * ${d} * 2 bytes = ${bytesTotal.toLocaleString()} bytes = ~${mbTotal} MB.`
+          };
+        },
+
+        // Generator 3: Multi-Head Attention Flops
+        (seed) => {
+          const Ns = [1024, 2048, 4096];
+          const dk = 64;
+          const heads = [8, 16, 32];
+          const N = Ns[seed % Ns.length];
+          const h = heads[(seed >> 2) % heads.length];
+          const flopsG = Math.round((2 * h * (N * N) * dk) / 1e9 * 100) / 100;
+          const flopsD1 = Math.round((flopsG * 2) * 100) / 100;
+          const flopsD2 = Math.round((flopsG / 2) * 100) / 100;
+          const flopsD3 = Math.round((flopsG * 4) * 100) / 100;
+
+          const qId = `proc_flops_${N}_${h}`;
+          return {
+            id: qId,
+            topic: 'Transformer Complexity',
+            difficulty: 'Advanced Mathematical',
+            question: `In standard Multi-Head Attention with sequence length N = ${N}, H = ${h} heads, and d_k = ${dk}, how many floating point operations (FLOPs, 2 ops per MAC) are required to compute QK^T?`,
+            options: {
+              A: `~${flopsG} GFLOPs`,
+              B: `~${flopsD1} GFLOPs`,
+              C: `~${flopsD2} GFLOPs`,
+              D: `~${flopsD3} GFLOPs`
+            },
+            answer: 'A',
+            explanation: `QK^T computes H * N^2 dot products of dimension d_k. At 2 FLOPs per multiply-accumulate: 2 * ${h} * (${N}^2) * ${dk} = ${(2 * h * N * N * dk).toExponential(2)} FLOPs = ~${flopsG} GFLOPs.`
+          };
+        },
+
+        // Generator 4: Receptive Field of Stride-2 Conv
+        (seed) => {
+          const kSizes = [3, 5];
+          const depths = [3, 4, 5];
+          const k = kSizes[seed % kSizes.length];
+          const d = depths[(seed >> 2) % depths.length];
+          let rf = 1;
+          let currentStride = 1;
+          for (let i = 0; i < d; i++) {
+            rf += (k - 1) * currentStride;
+            currentStride *= 2;
+          }
+          const qId = `proc_rf_${k}_${d}`;
+          return {
+            id: qId,
+            topic: 'Convolutional Architectures',
+            difficulty: 'Advanced Deep Learning',
+            question: `A CNN has ${d} stacked convolutional layers, each with kernel size K = ${k} and stride S = 2. What is the effective 1D receptive field of a neuron in the final layer?`,
+            options: {
+              A: `${rf} pixels`,
+              B: `${rf + (k * 2)} pixels`,
+              C: `${rf - (k - 1)} pixels`,
+              D: `${rf * 2} pixels`
+            },
+            answer: 'A',
+            explanation: `Using the receptive field recursion RF_l = RF_{l-1} + (K - 1) * Stride_{cumulative}, stepping through ${d} layers with kernel ${k} and stride 2 yields exactly ${rf} pixels.`
+          };
+        },
+
+        // Generator 5: Distributed Gradient Accumulation
+        (seed) => {
+          const gpus = [4, 8, 16];
+          const microBatch = [2, 4, 8];
+          const accumSteps = [4, 8, 16];
+          const g = gpus[seed % gpus.length];
+          const m = microBatch[(seed >> 2) % microBatch.length];
+          const a = accumSteps[(seed >> 4) % accumSteps.length];
+          const effective = g * m * a;
+
+          const qId = `proc_batch_${g}_${m}_${a}`;
+          return {
+            id: qId,
+            topic: 'Distributed Training Systems',
+            difficulty: 'Engineering Systems',
+            question: `In distributed training across ${g} GPUs, each worker uses a micro-batch size of ${m} and accumulates gradients for ${a} forward/backward steps before an optimizer step. What is the effective global batch size?`,
+            options: {
+              A: `${effective} samples`,
+              B: `${effective / 2} samples`,
+              C: `${effective * 2} samples`,
+              D: `${g * m} samples`
+            },
+            answer: 'A',
+            explanation: `Global batch size = GPUs (${g}) * Micro-batch (${m}) * Accumulation steps (${a}) = ${effective} samples.`
+          };
+        }
+      ];
+
+      static validateQuestion(q) {
+        if (!q || !q.id || !q.question || !q.options) return false;
+        const keys = ['A', 'B', 'C', 'D'];
+        for (const k of keys) {
+          if (!q.options[k] || typeof q.options[k] !== 'string' || q.options[k].trim().length === 0) {
+            return false;
+          }
+        }
+        if (!['A', 'B', 'C', 'D'].includes(q.answer)) return false;
+        const set = new Set(Object.values(q.options));
+        if (set.size !== 4) return false;
+        return true;
+      }
+
+      static shuffleOptions(question) {
+        const originalOptions = [
+          { key: 'A', text: question.options.A, isCorrect: question.answer === 'A' },
+          { key: 'B', text: question.options.B, isCorrect: question.answer === 'B' },
+          { key: 'C', text: question.options.C, isCorrect: question.answer === 'C' },
+          { key: 'D', text: question.options.D, isCorrect: question.answer === 'D' },
+        ];
+
+        for (let i = originalOptions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [originalOptions[i], originalOptions[j]] = [originalOptions[j], originalOptions[i]];
+        }
+
+        const keys = ['A', 'B', 'C', 'D'];
+        const shuffledOptions = {};
+        let newCorrectAnswer = 'A';
+
+        originalOptions.forEach((opt, idx) => {
+          const k = keys[idx];
+          shuffledOptions[k] = opt.text;
+          if (opt.isCorrect) newCorrectAnswer = k;
+        });
+
+        return {
+          id: question.id,
+          topic: question.topic,
+          difficulty: question.difficulty,
+          question: question.question,
+          options: shuffledOptions,
+          answer: newCorrectAnswer,
+          explanation: question.explanation
+        };
+      }
+
+      static getNextQuestion(usedIds = []) {
+        const unused = this.CURATED_QUESTIONS.filter(q => !usedIds.includes(q.id));
+        if (unused.length > 0) {
+          const selected = unused[Math.floor(Math.random() * unused.length)];
+          return this.shuffleOptions(selected);
+        }
+
+        let attempts = 0;
+        while (attempts < 50) {
+          const seed = Math.floor(Math.random() * 10000) + attempts;
+          const genIndex = (attempts + seed) % this.PROCEDURAL_GENERATORS.length;
+          const generator = this.PROCEDURAL_GENERATORS[genIndex];
+          const q = generator(seed);
+          if (!usedIds.includes(q.id) && this.validateQuestion(q)) {
+            return this.shuffleOptions(q);
+          }
+          attempts++;
+        }
+
+        const base = this.CURATED_QUESTIONS[Math.floor(Math.random() * this.CURATED_QUESTIONS.length)];
+        return this.shuffleOptions({ ...base, id: `${base.id}_cycle_${Date.now()}` });
+      }
+
+      static simulateAIAnswer(question, difficulty) {
+        let accuracy = 0.40;
+        let minDelay = 4500;
+        let maxDelay = 8500;
+
+        switch (difficulty) {
+          case 'easy':
+            accuracy = 0.35;
+            minDelay = 5000;
+            maxDelay = 9000;
+            break;
+          case 'medium':
+            accuracy = 0.60;
+            minDelay = 3500;
+            maxDelay = 6500;
+            break;
+          case 'hard':
+            accuracy = 0.82;
+            minDelay = 2200;
+            maxDelay = 4500;
+            break;
+          case 'impossible':
+          default:
+            accuracy = 0.94;
+            minDelay = 1600;
+            maxDelay = 3200;
+            break;
+        }
+
+        const isCorrect = Math.random() < accuracy;
+        let chosenOption;
+
+        if (isCorrect) {
+          chosenOption = question.answer;
+        } else {
+          const wrong = ['A', 'B', 'C', 'D'].filter(k => k !== question.answer);
+          chosenOption = wrong[Math.floor(Math.random() * wrong.length)];
+        }
+
+        const delayMs = Math.floor(minDelay + Math.random() * (maxDelay - minDelay));
+        return { option: chosenOption, delayMs };
+      }
+    }
+
+    function App() {
+      const [view, setView] = useState('home'); // home | play | modes | online_lobby | history | puzzles | settings | audit
+      const [theme, setTheme] = useState('midnight_neon');
+      const [view3D, setView3D] = useState(true); // 3D Perspective Toggle
+
+      // Overall User Progression & Statistics
+      const [stats, setStats] = useState({
+        matches: 1250, wins: 850, losses: 320, draws: 80, streak: 18, bestStreak: 24, xp: 720, level: 12
+      });
+      const [matchHistory, setMatchHistory] = useState([]);
+      const [toasts, setToasts] = useState([]);
+      const [showProfileModal, setShowProfileModal] = useState(false);
+      const [profileTab, setProfileTab] = useState('stats'); // stats | achievements | history
+
+      // The 3 Core Game Modes: 'friend' (Pass & Play) | 'ai' (Vs Computer) | 'online' (Invite Online Player)
+      const [gameMode, setGameMode] = useState('ai');
+      const [boardSize, setBoardSize] = useState(3);
+      const [board, setBoard] = useState(Array(9).fill(null));
+      const [turn, setTurn] = useState('X');
+      const [playerSym, setPlayerSym] = useState('X');
+      const [oppSym, setOppSym] = useState('O');
+      const [gameStatus, setGameStatus] = useState('playing'); // playing | won | draw
+      const [winner, setWinner] = useState(null);
+      const [winningLine, setWinningLine] = useState(null);
+      const [moveHistory, setMoveHistory] = useState([]);
+
+      // Match Timer State (State-Driven seconds)
+      const [matchElapsedSeconds, setMatchElapsedSeconds] = useState(45);
+
+      // Mode 1: Friend (Pass & Play) State
+      const [player1Name, setPlayer1Name] = useState('Player 1');
+      const [player2Name, setPlayer2Name] = useState('Player 2');
+      const [friendScore, setFriendScore] = useState({ p1: 0, p2: 0, draws: 0 });
+
+      // Mode 2: Computer / AI State
+      const [aiDiff, setAiDiff] = useState('impossible'); // easy | medium | hard | impossible
+      const [isAiThinking, setIsAiThinking] = useState(false);
+      const [inventory, setInventory] = useState({ undo: 2, eraser: 2, shield: 2, hint: 3 });
+      const [shields, setShields] = useState([]);
+      const [activePowerUp, setActivePowerUp] = useState(null);
+      const [hintSquare, setHintSquare] = useState(null);
+      const [hintText, setHintText] = useState('');
+
+      // Mode 3: Real Online Multiplayer State
+      const [onlineRole, setOnlineRole] = useState('host'); // host | guest
+      const [roomCode, setRoomCode] = useState('');
+      const [joinCodeInput, setJoinCodeInput] = useState('');
+      const [onlineStatus, setOnlineStatus] = useState('idle'); // idle | waiting | connected | disconnected
+      const [onlineLatency, setOnlineLatency] = useState(24);
+      const [activeReaction, setActiveReaction] = useState(null);
+      const [rematchStatus, setRematchStatus] = useState(null);
+
+      // Dual-channel WebRTC + BroadcastChannel refs
+      const peerRef = useRef(null);
+      const connRef = useRef(null);
+      const broadcastRef = useRef(null);
+
+      // AI/ML Knowledge Battle State
+      const [currentQuestion, setCurrentQuestion] = useState(null);
+      const [questionDeadline, setQuestionDeadline] = useState(null);
+      const [questionRemainingMs, setQuestionRemainingMs] = useState(10000);
+      const [questionStatus, setQuestionStatus] = useState('idle'); // idle | active | resolved | expired
+      const [p1Answer, setP1Answer] = useState(null); // { option, isCorrect, timestamp }
+      const [p2Answer, setP2Answer] = useState(null); // { option, isCorrect, timestamp }
+      const [aiAnswerState, setAiAnswerState] = useState(null); // { option, isCorrect, isThinking, timestamp }
+      const [questionWinner, setQuestionWinner] = useState(null); // 'p1' | 'p2' | 'ai' | 'host' | 'guest'
+      const [questionWinnerSym, setQuestionWinnerSym] = useState(null); // 'X' | 'O'
+      const [movePermission, setMovePermission] = useState(null); // { player, symbol, questionId }
+      const [usedQuestionIds, setUsedQuestionIds] = useState([]);
+      const [explanationVisible, setExplanationVisible] = useState(false);
+
+      const aiTimerRef = useRef(null);
+      const nextQuestionTimeoutRef = useRef(null);
+
+      const clearQuestionTimers = () => {
+        if (aiTimerRef.current) {
+          clearTimeout(aiTimerRef.current);
+          aiTimerRef.current = null;
+        }
+        if (nextQuestionTimeoutRef.current) {
+          clearTimeout(nextQuestionTimeoutRef.current);
+          nextQuestionTimeoutRef.current = null;
+        }
+      };
+
+      // 10-Second High-Precision Question Countdown Timer
+      useEffect(() => {
+        let interval = null;
+        if (view === 'play' && gameStatus === 'playing' && questionStatus === 'active' && questionDeadline) {
+          interval = setInterval(() => {
+            const now = Date.now();
+            const remaining = Math.max(0, questionDeadline - now);
+            setQuestionRemainingMs(remaining);
+            if (remaining <= 0) {
+              clearInterval(interval);
+              handleQuestionExpired();
+            }
+          }, 50);
+        }
+        return () => {
+          if (interval) clearInterval(interval);
+        };
+      }, [view, gameStatus, questionStatus, questionDeadline]);
+
+      // Tactical Puzzle State
+      const [activePuzzle, setActivePuzzle] = useState(TACTICAL_PUZZLES[0]);
+      const [puzzleBoard, setPuzzleBoard] = useState([...TACTICAL_PUZZLES[0].initial]);
+      const [puzzleStatus, setPuzzleStatus] = useState('playing');
+
+      // QA Audit State
+      const [auditResults, setAuditResults] = useState([]);
+      const [isAuditing, setIsAuditing] = useState(false);
+
+      // Timer Effect for Active Match
+      useEffect(() => {
+        let interval = null;
+        if (view === 'play' && gameStatus === 'playing') {
+          interval = setInterval(() => {
+            setMatchElapsedSeconds(s => s + 1);
+          }, 1000);
+        }
+        return () => clearInterval(interval);
+      }, [view, gameStatus]);
+
+      // Load Saved Local Data on Mount
+      useEffect(() => {
+        try {
+          const raw = localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2');
+          if (raw) {
+            const data = JSON.parse(raw);
+            if (data.stats) setStats(data.stats);
+            if (data.matchHistory) setMatchHistory(data.matchHistory);
+            if (data.theme) {
+              setTheme(data.theme);
+              document.documentElement.setAttribute('data-theme', data.theme);
+            }
+            if (data.view3D !== undefined) setView3D(data.view3D);
+            if (data.usedQuestionIds) setUsedQuestionIds(data.usedQuestionIds);
+          }
+        } catch {}
+
+        // Check if arrived via invite URL (?room=BTG-XXXX)
+        const params = new URLSearchParams(window.location.search);
+        const urlRoom = params.get('room');
+        if (urlRoom) {
+          const cleanCode = urlRoom.trim().toUpperCase();
+          setJoinCodeInput(cleanCode);
+          setView('online_lobby');
+          showToast('Online Invite Link Detected', `Ready to join Room ${cleanCode}!`);
+        }
+      }, []);
+
+      const showToast = (title, message) => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, title, message }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4200);
+      };
+
+      const changeTheme = (newTheme) => {
+        setTheme(newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+        try {
+          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
+          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, theme: newTheme }));
+        } catch {}
+        SoundManager.playClick();
+      };
+
+      const toggle3DView = () => {
+        const next = !view3D;
+        setView3D(next);
+        try {
+          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
+          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, view3D: next }));
+        } catch {}
+        SoundManager.playClick();
+        showToast('Camera Perspective', next ? '🎲 3D Perspective Tilt Activated' : '📐 2D Top-Down View Activated');
+      };
+
+      const formatTime = (secs) => {
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      };
+
+      const generateRoomCode = () => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = 'BTG-';
+        for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+        return code;
+      };
+
+      // -------------------------------------------------------------
+      // AI/ML KNOWLEDGE BATTLE ENGINE METHODS
+      // -------------------------------------------------------------
+      const spawnQuestion = (customUsedIds = null) => {
+        clearQuestionTimers();
+        const activeUsed = customUsedIds || usedQuestionIds;
+        const q = AIMLQuestionEngine.getNextQuestion(activeUsed);
+        const nextUsed = [...activeUsed, q.id];
+        setUsedQuestionIds(nextUsed);
+
+        try {
+          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || '{}');
+          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, usedQuestionIds: nextUsed.slice(-100) }));
+        } catch {}
+
+        const deadline = Date.now() + 10000;
+        setCurrentQuestion(q);
+        setQuestionDeadline(deadline);
+        setQuestionRemainingMs(10000);
+        setQuestionStatus('active');
+        setP1Answer(null);
+        setP2Answer(null);
+        setAiAnswerState(null);
+        setQuestionWinner(null);
+        setQuestionWinnerSym(null);
+        setExplanationVisible(false);
+        setMovePermission(null);
+
+        // Online Host broadcast
+        if (gameMode === 'online' && onlineRole === 'host') {
+          sendOnlineMsg({
+            type: 'QUESTION_START',
+            question: {
+              id: q.id,
+              topic: q.topic,
+              difficulty: q.difficulty,
+              question: q.question,
+              options: q.options
+            },
+            deadline,
+            questionId: q.id
+          });
+        }
+
+        // Genuine AI Answering Simulation in AI Mode
+        if (gameMode === 'ai') {
+          setAiAnswerState({ isThinking: true, option: null, isCorrect: null });
+          const plan = AIMLQuestionEngine.simulateAIAnswer(q, aiDiff);
+          aiTimerRef.current = setTimeout(() => {
+            handleAIAnswerSubmission(q, plan.option);
+          }, plan.delayMs);
+        }
+      };
+
+      const handleQuestionExpired = () => {
+        setQuestionStatus('expired');
+        setExplanationVisible(true);
+        setMovePermission(null);
+        SoundManager.playError();
+        showToast("Time's Up!", "10 seconds elapsed. No player earned a move. Next question loading...");
+
+        if (gameMode === 'online' && onlineRole === 'host' && currentQuestion) {
+          sendOnlineMsg({
+            type: 'QUESTION_EXPIRED',
+            questionId: currentQuestion.id,
+            answer: currentQuestion.answer,
+            explanation: currentQuestion.explanation
+          });
+        }
+
+        clearQuestionTimers();
+        nextQuestionTimeoutRef.current = setTimeout(() => {
+          setGameStatus(latestStatus => {
+            if (latestStatus === 'playing') {
+              spawnQuestion();
+            }
+            return latestStatus;
+          });
+        }, 2600);
+      };
+
+      const submitPlayerAnswer = (playerRole, option) => {
+        if (questionStatus !== 'active' || !currentQuestion) return;
+
+        // In Online Mode (Guest): send submission to authoritative Host
+        if (gameMode === 'online' && onlineRole === 'guest') {
+          sendOnlineMsg({
+            type: 'SUBMIT_ANSWER',
+            questionId: currentQuestion.id,
+            option,
+            playerRole: 'guest'
+          });
+          setP2Answer({ option, isCorrect: null, timestamp: Date.now() });
+          return;
+        }
+
+        // Evaluate answer
+        const isCorrect = (option === currentQuestion.answer);
+
+        if (playerRole === 'p1' || (gameMode === 'online' && onlineRole === 'host')) {
+          setP1Answer({ option, isCorrect, timestamp: Date.now() });
+        } else if (playerRole === 'p2') {
+          setP2Answer({ option, isCorrect, timestamp: Date.now() });
+        }
+
+        if (!isCorrect) {
+          SoundManager.playError();
+          showToast("Incorrect Answer", "Wrong option. Try again before time expires!");
+          return;
+        }
+
+        // FIRST ACCEPTED CORRECT ANSWER WINS
+        clearQuestionTimers();
+        SoundManager.playWin();
+
+        const winnerId = playerRole === 'p1' ? 'p1' : 'p2';
+        const winSym = (playerRole === 'p1' ? 'X' : 'O');
+
+        setQuestionStatus('resolved');
+        setQuestionWinner(winnerId);
+        setQuestionWinnerSym(winSym);
+        setExplanationVisible(true);
+
+        const perm = { player: winnerId, symbol: winSym, questionId: currentQuestion.id };
+        setMovePermission(perm);
+
+        const winnerDisplayName = playerRole === 'p1' ? (gameMode === 'friend' ? player1Name : 'You') : (gameMode === 'friend' ? player2Name : 'Player 2');
+        showToast("Question Solved!", `+1 Move Permission granted to ${winnerDisplayName} (${winSym})! Select an open cell.`);
+
+        if (gameMode === 'online' && onlineRole === 'host') {
+          sendOnlineMsg({
+            type: 'QUESTION_RESOLVED',
+            questionId: currentQuestion.id,
+            winner: 'host',
+            winnerSymbol: 'X',
+            answer: currentQuestion.answer,
+            explanation: currentQuestion.explanation
+          });
+        }
+      };
+
+      const handleAIAnswerSubmission = (targetQuestion, option) => {
+        if (questionStatus !== 'active' || !currentQuestion || currentQuestion.id !== targetQuestion.id) return;
+
+        const isCorrect = (option === targetQuestion.answer);
+        setAiAnswerState({ isThinking: false, option, isCorrect, timestamp: Date.now() });
+
+        if (!isCorrect) {
+          const remaining = Math.max(0, questionDeadline - Date.now());
+          if (remaining > 3500) {
+            aiTimerRef.current = setTimeout(() => {
+              if (questionStatus === 'active') {
+                const retryPlan = AIMLQuestionEngine.simulateAIAnswer(targetQuestion, aiDiff);
+                handleAIAnswerSubmission(targetQuestion, retryPlan.option);
+              }
+            }, 3000);
+          }
+          return;
+        }
+
+        // AI answered correctly FIRST
+        clearQuestionTimers();
+        SoundManager.playError();
+
+        setQuestionStatus('resolved');
+        setQuestionWinner('ai');
+        setQuestionWinnerSym(oppSym);
+        setExplanationVisible(true);
+
+        const perm = { player: 'ai', symbol: oppSym, questionId: targetQuestion.id };
+        setMovePermission(perm);
+        showToast("Aether AI Won the Move!", `AI answered Option ${option} correctly and earned the next placement.`);
+
+        setTimeout(() => {
+          executeAIMove(perm);
+        }, 750);
+      };
+
+      const executeAIMove = (perm) => {
+        setBoard(latestBoard => {
+          const { winner: checkWin } = GameEngine.checkWinner(latestBoard, boardSize, boardSize);
+          if (checkWin || GameEngine.isFull(latestBoard)) {
+            setMovePermission(null);
+            return latestBoard;
+          }
+
+          const aiMove = MinimaxAI.getMove(latestBoard, boardSize, oppSym, playerSym, aiDiff, boardSize);
+          if (aiMove !== -1 && latestBoard[aiMove] === null) {
+            SoundManager.playMove(oppSym === 'X');
+            const updated = [...latestBoard];
+            updated[aiMove] = oppSym;
+            setMoveHistory(prev => [...prev, { index: aiMove, sym: oppSym }]);
+            setMovePermission(null);
+
+            const { winner: aiWin, winningLine: aiLine } = GameEngine.checkWinner(updated, boardSize, boardSize);
+            if (aiWin) {
+              finishGameOver(aiWin, aiLine, 'ai');
+            } else if (GameEngine.isFull(updated)) {
+              finishGameOver('draw', null, 'ai');
+            } else {
+              setTurn(playerSym);
+              setTimeout(() => {
+                setGameStatus(curStatus => {
+                  if (curStatus === 'playing') spawnQuestion();
+                  return curStatus;
+                });
+              }, 800);
+            }
+            return updated;
+          }
+
+          setMovePermission(null);
+          return latestBoard;
+        });
+      };
+
+      // -------------------------------------------------------------
+      // START MATCH
+      // -------------------------------------------------------------
+      const startMatch = (mode = gameMode, size = 3, diff = aiDiff) => {
+        let targetMode = mode;
+        if (targetMode === 'online' && onlineStatus !== 'connected') {
+          targetMode = 'ai';
+        }
+
+        clearQuestionTimers();
+        setGameMode(targetMode);
+        setBoardSize(size);
+        setAiDiff(diff);
+        setBoard(Array(size * size).fill(null));
+        setMoveHistory([]);
+        setTurn('X');
+        setGameStatus('playing');
+        setWinner(null);
+        setWinningLine(null);
+        setShields([]);
+        setActivePowerUp(null);
+        setHintSquare(null);
+        setHintText('');
+        setRematchStatus(null);
+        setMatchElapsedSeconds(0);
+        setIsAiThinking(false);
+        setMovePermission(null);
+        setInventory({ undo: 2, eraser: 2, shield: 2, hint: 3 });
+
+        if (targetMode === 'friend') {
+          setPlayerSym('X');
+          setOppSym('O');
+        } else if (targetMode === 'ai') {
+          setPlayerSym('X');
+          setOppSym('O');
+        } else if (targetMode === 'online') {
+          setPlayerSym(onlineRole === 'host' ? 'X' : 'O');
+          setOppSym(onlineRole === 'host' ? 'O' : 'X');
+        }
+
+        setView('play');
+        SoundManager.playClick();
+
+        // MATCH STARTS WITH A QUESTION IMMEDIATELY (NO EXCEPTIONS!)
+        if (targetMode !== 'online' || onlineRole === 'host') {
+          setTimeout(() => {
+            spawnQuestion([]);
+          }, 350);
+        }
+      };
+
+      // -------------------------------------------------------------
+      // ONLINE MULTIPLAYER
+      // -------------------------------------------------------------
+      const cleanupOnline = () => {
+        clearQuestionTimers();
+        if (connRef.current) {
+          try { connRef.current.close(); } catch {}
+          connRef.current = null;
+        }
+        if (peerRef.current) {
+          try { peerRef.current.destroy(); } catch {}
+          peerRef.current = null;
+        }
+        if (broadcastRef.current) {
+          try { broadcastRef.current.close(); } catch {}
+          broadcastRef.current = null;
+        }
+      };
+
+      const sendOnlineMsg = (data) => {
+        if (broadcastRef.current) {
+          try { broadcastRef.current.postMessage(data); } catch {}
+        }
+        if (connRef.current && connRef.current.open) {
+          try { connRef.current.send(data); } catch {}
+        }
+      };
+
+      const handleIncomingOnlineMsg = (data) => {
+        if (!data || !data.type) return;
+
+        if (data.type === 'GUEST_JOINED') {
+          setOnlineStatus('connected');
+          SoundManager.playClick();
+          showToast('Player Joined!', `${data.guestName || 'Opponent'} connected to room! Game starting!`);
+          sendOnlineMsg({ type: 'HOST_ACK', hostName: player1Name });
+          setBoard(Array(9).fill(null));
+          setTurn('X');
+          setGameStatus('playing');
+          setWinner(null);
+          setWinningLine(null);
+          setPlayerSym('X');
+          setOppSym('O');
+          setMatchElapsedSeconds(0);
+          setView('play');
+          setTimeout(() => spawnQuestion([]), 450);
+        }
+
+        if (data.type === 'HOST_ACK') {
+          setOnlineStatus('connected');
+          SoundManager.playClick();
+          showToast('Room Connected!', `Joined match hosted by ${data.hostName || 'Host'}!`);
+          setBoard(Array(9).fill(null));
+          setTurn('X');
+          setGameStatus('playing');
+          setWinner(null);
+          setWinningLine(null);
+          setPlayerSym('O');
+          setOppSym('X');
+          setMatchElapsedSeconds(0);
+          setView('play');
+        }
+
+        if (data.type === 'QUESTION_START') {
+          clearQuestionTimers();
+          setCurrentQuestion(data.question);
+          setQuestionDeadline(data.deadline);
+          setQuestionRemainingMs(Math.max(0, data.deadline - Date.now()));
+          setQuestionStatus('active');
+          setP1Answer(null);
+          setP2Answer(null);
+          setQuestionWinner(null);
+          setQuestionWinnerSym(null);
+          setExplanationVisible(false);
+          setMovePermission(null);
+        }
+
+        if (data.type === 'SUBMIT_ANSWER') {
+          if (onlineRole === 'host' && questionStatus === 'active' && currentQuestion && currentQuestion.id === data.questionId) {
+            const isCorrect = (data.option === currentQuestion.answer);
+            if (isCorrect) {
+              clearQuestionTimers();
+              SoundManager.playWin();
+              setQuestionStatus('resolved');
+              setQuestionWinner('guest');
+              setQuestionWinnerSym('O');
+              setExplanationVisible(true);
+              const perm = { player: 'guest', symbol: 'O', questionId: currentQuestion.id };
+              setMovePermission(perm);
+              showToast("Opponent Won Question", "Guest answered correctly first! Move granted to opponent.");
+              sendOnlineMsg({
+                type: 'QUESTION_RESOLVED',
+                questionId: currentQuestion.id,
+                winner: 'guest',
+                winnerSymbol: 'O',
+                answer: currentQuestion.answer,
+                explanation: currentQuestion.explanation
+              });
+            } else {
+              sendOnlineMsg({
+                type: 'ANSWER_FEEDBACK',
+                questionId: currentQuestion.id,
+                option: data.option,
+                isCorrect: false
+              });
+            }
+          }
+        }
+
+        if (data.type === 'ANSWER_FEEDBACK') {
+          SoundManager.playError();
+          setP2Answer({ option: data.option, isCorrect: false, timestamp: Date.now() });
+          showToast("Incorrect Answer", "Wrong option. Try again before time expires!");
+        }
+
+        if (data.type === 'QUESTION_RESOLVED') {
+          clearQuestionTimers();
+          setQuestionStatus('resolved');
+          setQuestionWinner(data.winner);
+          setQuestionWinnerSym(data.winnerSymbol);
+          setExplanationVisible(true);
+          const myRole = onlineRole === 'host' ? 'host' : 'guest';
+          const perm = { player: data.winner, symbol: data.winnerSymbol, questionId: data.questionId };
+          setMovePermission(perm);
+          if (data.winner === myRole) {
+            SoundManager.playWin();
+            showToast("Question Won!", "You answered correctly first! Exactly 1 move earned — select an open cell.");
+          } else {
+            SoundManager.playError();
+            showToast("Opponent Won Move", "Opponent answered correctly first and earned the next move.");
+          }
+        }
+
+        if (data.type === 'QUESTION_EXPIRED') {
+          setQuestionStatus('expired');
+          setExplanationVisible(true);
+          setMovePermission(null);
+          SoundManager.playError();
+          showToast("Time's Up!", `Question expired! Correct answer was Option ${data.answer}.`);
+        }
+
+        if (data.type === 'MOVE') {
+          handleRemoteMove(data.index, data.symbol);
+        }
+
+        if (data.type === 'REACTION') {
+          triggerReactionDisplay(data.emoji);
+        }
+
+        if (data.type === 'REMATCH_REQ') {
+          setRematchStatus('requested_by_them');
+          SoundManager.playClick();
+          showToast('Rematch Requested', 'Opponent wants a rematch! Click "Accept Rematch" to play.');
+        }
+
+        if (data.type === 'REMATCH_ACCEPT') {
+          clearQuestionTimers();
+          setBoard(Array(boardSize * boardSize).fill(null));
+          setTurn('X');
+          setGameStatus('playing');
+          setWinner(null);
+          setWinningLine(null);
+          setRematchStatus(null);
+          setMatchElapsedSeconds(0);
+          setMovePermission(null);
+          SoundManager.playWin();
+          showToast('Rematch Started', 'The grid has been reset! Answer first to move.');
+          if (onlineRole === 'host') {
+            setTimeout(() => spawnQuestion([]), 450);
+          }
+        }
+
+        if (data.type === 'LEAVE') {
+          setOnlineStatus('disconnected');
+          SoundManager.playError();
+          showToast('Opponent Disconnected', 'Opponent has left the online room.');
+        }
+      };
+
+      const hostOnlineRoom = () => {
+        cleanupOnline();
+        const code = generateRoomCode();
+        setRoomCode(code);
+        setOnlineRole('host');
+        setOnlineStatus('waiting');
+        setGameMode('online');
+        setPlayerSym('X');
+        setOppSym('O');
+
+        const bc = new BroadcastChannel('btg_online_channel_' + code);
+        bc.onmessage = (e) => handleIncomingOnlineMsg(e.data);
+        broadcastRef.current = bc;
+
+        if (window.Peer) {
+          try {
+            const peerId = 'btg-room-' + code.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const p = new window.Peer(peerId);
+            peerRef.current = p;
+
+            p.on('open', () => {
+              setOnlineLatency(18 + Math.floor(Math.random() * 12));
+            });
+
+            p.on('connection', (conn) => {
+              connRef.current = conn;
+              conn.on('data', (d) => handleIncomingOnlineMsg(d));
+              conn.on('open', () => {
+                handleIncomingOnlineMsg({ type: 'GUEST_JOINED', guestName: 'Online Player' });
+              });
+              conn.on('close', () => {
+                handleIncomingOnlineMsg({ type: 'LEAVE' });
+              });
+            });
+
+            p.on('error', (err) => {
+              console.warn('PeerJS notice:', err);
+            });
+          } catch (e) {
+            console.warn('Peer setup error:', e);
+          }
+        }
+
+        SoundManager.playClick();
+        showToast('Online Room Created', `Room ${code} is active. Share your code or invite link!`);
+      };
+
+      const joinOnlineRoom = (targetCode) => {
+        const code = (targetCode || joinCodeInput).trim().toUpperCase();
+        if (!code || code.length < 4) {
+          SoundManager.playError();
+          showToast('Invalid Code', 'Please enter a valid 6-character room code (e.g. BTG-7K4X).');
+          return;
+        }
+
+        cleanupOnline();
+        setRoomCode(code);
+        setOnlineRole('guest');
+        setOnlineStatus('waiting');
+        setGameMode('online');
+        setPlayerSym('O');
+        setOppSym('X');
+
+        const bc = new BroadcastChannel('btg_online_channel_' + code);
+        bc.onmessage = (e) => handleIncomingOnlineMsg(e.data);
+        broadcastRef.current = bc;
+
+        setTimeout(() => {
+          bc.postMessage({ type: 'GUEST_JOINED', guestName: player2Name || 'Player 2' });
+        }, 150);
+
+        if (window.Peer) {
+          try {
+            const p = new window.Peer();
+            peerRef.current = p;
+
+            p.on('open', () => {
+              const hostPeerId = 'btg-room-' + code.toLowerCase().replace(/[^a-z0-9]/g, '');
+              const conn = p.connect(hostPeerId, { reliable: true });
+              connRef.current = conn;
+
+              conn.on('open', () => {
+                conn.send({ type: 'GUEST_JOINED', guestName: player2Name || 'Player 2' });
+              });
+              conn.on('data', (d) => handleIncomingOnlineMsg(d));
+              conn.on('close', () => handleIncomingOnlineMsg({ type: 'LEAVE' }));
+            });
+
+            p.on('error', (err) => {
+              console.warn('Peer connection info:', err);
+            });
+          } catch (e) {
+            console.warn('Peer join error:', e);
+          }
+        }
+
+        SoundManager.playClick();
+        showToast('Connecting to Room', `Attempting connection to Room ${code}...`);
+      };
+
+      const copyInviteLink = () => {
+        const url = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
+        navigator.clipboard.writeText(url).then(() => {
+          SoundManager.playClick();
+          showToast('Invite Link Copied! 📋', 'Share this direct link with your friend to play together!');
+        }).catch(() => {
+          prompt('Copy this invite URL:', url);
+        });
+      };
+
+      const copyRoomCode = () => {
+        navigator.clipboard.writeText(roomCode).then(() => {
+          SoundManager.playClick();
+          showToast('Room Code Copied! 📋', `Code: ${roomCode}`);
+        }).catch(() => {
+          prompt('Copy Room Code:', roomCode);
+        });
+      };
+
+      const sendReaction = (emoji) => {
+        triggerReactionDisplay(emoji);
+        sendOnlineMsg({ type: 'REACTION', emoji, sender: playerSym });
+        SoundManager.playReaction();
+      };
+
+      const triggerReactionDisplay = (emoji) => {
+        const id = Date.now();
+        setActiveReaction({ emoji, id });
+        SoundManager.playReaction();
+        setTimeout(() => {
+          setActiveReaction(prev => prev && prev.id === id ? null : prev);
+        }, 1600);
+      };
+
+      const requestOnlineRematch = () => {
+        if (rematchStatus === 'requested_by_them') {
+          sendOnlineMsg({ type: 'REMATCH_ACCEPT' });
+          clearQuestionTimers();
+          setBoard(Array(boardSize * boardSize).fill(null));
+          setTurn('X');
+          setGameStatus('playing');
+          setWinner(null);
+          setWinningLine(null);
+          setRematchStatus(null);
+          setMatchElapsedSeconds(0);
+          setMovePermission(null);
+          SoundManager.playWin();
+          showToast('Rematch Accepted!', 'The battlefield is reset! Ready for round 2.');
+          if (onlineRole === 'host') {
+            setTimeout(() => spawnQuestion([]), 450);
+          }
+        } else {
+          setRematchStatus('requested_by_me');
+          sendOnlineMsg({ type: 'REMATCH_REQ' });
+          SoundManager.playClick();
+          showToast('Rematch Requested', 'Waiting for opponent to accept...');
+        }
+      };
+
+      // -------------------------------------------------------------
+      // MOVE HANDLER (INTEGRATED WITH QUESTION BATTLE)
+      // -------------------------------------------------------------
+      const handleRemoteMove = (index, symbol) => {
+        setBoard(prevBoard => {
+          if (prevBoard[index] !== null) return prevBoard;
+          SoundManager.playMove(symbol === 'X');
+
+          const newBoard = [...prevBoard];
+          newBoard[index] = symbol;
+          setMoveHistory(h => [...h, { index, sym: symbol }]);
+          setMovePermission(null); // Move permission consumed
+
+          const { winner: winSym, winningLine: line } = GameEngine.checkWinner(newBoard, boardSize, boardSize);
+          if (winSym) {
+            finishGameOver(winSym, line, 'online');
+          } else if (GameEngine.isFull(newBoard)) {
+            finishGameOver('draw', null, 'online');
+          } else {
+            setTurn(symbol === 'X' ? 'O' : 'X');
+            // Host triggers next question automatically
+            if (onlineRole === 'host') {
+              setTimeout(() => {
+                setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+              }, 800);
+            }
+          }
+
+          return newBoard;
+        });
+      };
+
+      const handleCellClick = (index) => {
+        if (gameStatus !== 'playing') return;
+
+        // VERIFY MOVE PERMISSION
+        if (!movePermission) {
+          SoundManager.playError();
+          showToast("Move Locked", "Answer the AI/ML Question correctly first to earn a move!");
+          return;
+        }
+
+        // Verify permission ownership
+        if (gameMode === 'ai') {
+          if (movePermission.player !== 'p1') {
+            SoundManager.playError();
+            showToast("AI Move In Progress", "Aether AI won the question and is executing its move.");
+            return;
+          }
+        } else if (gameMode === 'online') {
+          const myRole = onlineRole === 'host' ? 'host' : 'guest';
+          if (movePermission.player !== myRole) {
+            SoundManager.playError();
+            showToast("Opponent's Move", "Opponent won the question battle and has the move.");
+            return;
+          }
+        }
+
+        // Handle Active Power-Ups
+        if (activePowerUp === 'eraser') {
+          if (board[index] === null) {
+            showToast('Invalid Target', 'Cell is empty. Choose a cell with a symbol.');
+            SoundManager.playError();
+            return;
+          }
+          if (shields.includes(index)) {
+            showToast('Shielded Cell', 'Aegis Shield blocks the Quantum Eraser!');
+            SoundManager.playError();
+            return;
+          }
+          const next = [...board];
+          next[index] = null;
+          setBoard(next);
+          setInventory(inv => ({ ...inv, eraser: Math.max(0, inv.eraser - 1) }));
+          setActivePowerUp(null);
+          setMovePermission(null);
+          SoundManager.playPowerUp();
+          showToast('Quantum Eraser', 'Cell symbol has been vaporized!');
+          setTimeout(() => {
+            setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+          }, 800);
+          return;
+        }
+
+        if (activePowerUp === 'shield') {
+          if (board[index] !== movePermission.symbol) {
+            showToast('Invalid Target', 'You can only shield your own placed symbols.');
+            SoundManager.playError();
+            return;
+          }
+          setShields(prev => [...prev, index]);
+          setInventory(inv => ({ ...inv, shield: Math.max(0, inv.shield - 1) }));
+          setActivePowerUp(null);
+          setMovePermission(null);
+          SoundManager.playPowerUp();
+          showToast('Aegis Shield', 'Symbol encased in energy barrier!');
+          setTimeout(() => {
+            setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+          }, 800);
+          return;
+        }
+
+        // Cell must be unoccupied
+        if (board[index] !== null) {
+          SoundManager.playError();
+          return;
+        }
+
+        // Clear any hint
+        setHintSquare(null);
+        setHintText('');
+
+        const movingSymbol = movePermission.symbol;
+        SoundManager.playMove(movingSymbol === 'X');
+
+        const newBoard = [...board];
+        newBoard[index] = movingSymbol;
+        setBoard(newBoard);
+        setMoveHistory(prev => [...prev, { index, sym: movingSymbol }]);
+
+        // MOVE PERMISSION CONSUMED
+        setMovePermission(null);
+
+        if (gameMode === 'online') {
+          sendOnlineMsg({ type: 'MOVE', index, symbol: movingSymbol, questionId: currentQuestion?.id });
+        }
+
+        const { winner: winSym, winningLine: line } = GameEngine.checkWinner(newBoard, boardSize, boardSize);
+        if (winSym) {
+          finishGameOver(winSym, line, gameMode);
+          return;
+        }
+        if (GameEngine.isFull(newBoard)) {
+          finishGameOver('draw', null, gameMode);
+          return;
+        }
+
+        const nextTurn = movingSymbol === 'X' ? 'O' : 'X';
+        setTurn(nextTurn);
+
+        // NEXT QUESTION APPEARS AUTOMATICALLY AFTER MOVE IS EXECUTED
+        setTimeout(() => {
+          setGameStatus(s => {
+            if (s === 'playing') {
+              spawnQuestion();
+            }
+            return s;
+          });
+        }, 800);
+      };
+
+
+      // -------------------------------------------------------------
+      // GAME OVER
+      // -------------------------------------------------------------
+      const finishGameOver = (result, line, mode) => {
+        setGameStatus(result === 'draw' ? 'draw' : 'won');
+        setWinner(result);
+        setWinningLine(line);
+
+        let isWin = false;
+        let xpGain = 30;
+
+        if (mode === 'friend') {
+          if (result === 'X') {
+            setFriendScore(s => ({ ...s, p1: s.p1 + 1 }));
+            SoundManager.playWin();
+            if (window.confetti) window.confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } });
+          } else if (result === 'O') {
+            setFriendScore(s => ({ ...s, p2: s.p2 + 1 }));
+            SoundManager.playWin();
+            if (window.confetti) window.confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } });
+          } else {
+            setFriendScore(s => ({ ...s, draws: s.draws + 1 }));
+            SoundManager.playDraw();
+          }
+          isWin = true;
+          xpGain = 80;
+        } else if (mode === 'ai') {
+          isWin = result === playerSym;
+          xpGain = isWin ? 150 : result === 'draw' ? 70 : 30;
+          if (isWin) {
+            SoundManager.playWin();
+            if (window.confetti) window.confetti({ particleCount: 130, spread: 80, origin: { y: 0.6 } });
+          } else if (result === 'draw') {
+            SoundManager.playDraw();
+          } else {
+            SoundManager.playError();
+          }
+        } else if (mode === 'online') {
+          isWin = result === playerSym;
+          xpGain = isWin ? 180 : result === 'draw' ? 90 : 40;
+          if (isWin) {
+            SoundManager.playWin();
+            if (window.confetti) window.confetti({ particleCount: 140, spread: 85, origin: { y: 0.6 } });
+          } else if (result === 'draw') {
+            SoundManager.playDraw();
+          } else {
+            SoundManager.playError();
+          }
+        }
+
+        const newRecord = {
+          id: Date.now(),
+          mode: mode === 'friend' ? 'Play with Friend' : mode === 'ai' ? `Vs AI (${aiDiff})` : `Online Room (${roomCode || 'P2P'})`,
+          opponent: mode === 'friend' ? `${player1Name} vs ${player2Name}` : mode === 'ai' ? `Aether AI` : `Online Player`,
+          result: result === 'draw' ? 'Draw' : (mode === 'friend' ? (result === 'X' ? `${player1Name} Won` : `${player2Name} Won`) : (result === playerSym ? 'Victory' : 'Defeat')),
+          date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          moves: board.filter(c => c !== null).length + 1
+        };
+
+        setMatchHistory(prev => [newRecord, ...prev].slice(0, 50));
+
+        setStats(prev => {
+          const newMatches = prev.matches + 1;
+          const newWins = isWin && result !== 'draw' ? prev.wins + 1 : prev.wins;
+          const newLosses = (!isWin && result !== 'draw') ? prev.losses + 1 : prev.losses;
+          const newDraws = result === 'draw' ? prev.draws + 1 : prev.draws;
+          const newStreak = isWin && result !== 'draw' ? prev.streak + 1 : 0;
+          const newBestStreak = Math.max(prev.bestStreak, newStreak);
+          const newXP = prev.xp + xpGain;
+          const newLevel = 1 + Math.floor(Math.pow(newXP / 150, 0.65));
+
+          const updated = {
+            matches: newMatches, wins: newWins, losses: newLosses, draws: newDraws,
+            streak: newStreak, bestStreak: newBestStreak, xp: newXP, level: newLevel
+          };
+
+          try {
+            const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
+            localStorage.setItem('zero_kaata_save_v1', JSON.stringify({
+              ...current,
+              stats: updated,
+              matchHistory: [newRecord, ...matchHistory].slice(0, 50)
+            }));
+          } catch {}
+
+          return updated;
+        });
+      };
+
+      const triggerUndo = () => {
+        if (inventory.undo <= 0 || gameMode === 'online' || gameStatus !== 'playing' || isAiThinking) return;
+        if (moveHistory.length === 0) {
+          showToast('Undo', 'No moves to undo yet.');
+          return;
+        }
+
+        SoundManager.playPowerUp();
+        setInventory(inv => ({ ...inv, undo: inv.undo - 1 }));
+
+        if (gameMode === 'friend') {
+          const last = moveHistory[moveHistory.length - 1];
+          const newHistory = moveHistory.slice(0, -1);
+          setMoveHistory(newHistory);
+          setBoard(prev => {
+            const next = [...prev];
+            next[last.index] = null;
+            return next;
+          });
+          setTurn(last.sym);
+          showToast('Chrono Rewind', 'Last move reversed!');
+          setTimeout(() => spawnQuestion(), 400);
+        } else if (gameMode === 'ai') {
+          // Revert both AI move and player's move so it returns to player's turn
+          const countToRevert = moveHistory.length >= 2 ? 2 : 1;
+          const reverted = moveHistory.slice(-countToRevert);
+          const newHistory = moveHistory.slice(0, -countToRevert);
+          setMoveHistory(newHistory);
+          setBoard(prev => {
+            const next = [...prev];
+            reverted.forEach(m => { next[m.index] = null; });
+            return next;
+          });
+          setTurn(playerSym);
+          setIsAiThinking(false);
+          showToast('Chrono Rewind', 'Moves reversed — answer question to make your move!');
+          setTimeout(() => spawnQuestion(), 400);
+        }
+      };
+
+      const triggerHint = () => {
+        if (inventory.hint <= 0 || gameMode === 'online') return;
+        SoundManager.playPowerUp();
+        const best = MinimaxAI.getMove(board, boardSize, playerSym, oppSym, 'impossible', boardSize);
+        if (best !== -1) {
+          setHintSquare(best);
+          setHintText(`Oracle recommends Cell ${best + 1} for optimal control.`);
+          setInventory(inv => ({ ...inv, hint: inv.hint - 1 }));
+          showToast('Oracle Hint', `Cell ${best + 1} highlighted!`);
+        }
+      };
+
+      // Tactical Puzzle Interactions
+      const handlePuzzleCell = (index) => {
+        if (puzzleStatus !== 'playing') return;
+        if (puzzleBoard[index] !== null) return;
+
+        const next = [...puzzleBoard];
+        next[index] = activePuzzle.playerSym;
+        setPuzzleBoard(next);
+
+        if (index === activePuzzle.solution) {
+          setPuzzleStatus('solved');
+          SoundManager.playWin();
+          if (window.confetti) window.confetti({ particleCount: 70, spread: 60 });
+          showToast('Puzzle Solved!', `+${activePuzzle.xp} XP earned!`);
+          setStats(s => ({ ...s, xp: s.xp + activePuzzle.xp }));
+        } else {
+          setPuzzleStatus('failed');
+          SoundManager.playError();
+          showToast('Incorrect Move', 'That move did not complete the tactic. Try again!');
+        }
+      };
+
+      // QA Full System Audit Runner
+      const runFullAudit = () => {
+        setIsAuditing(true);
+        SoundManager.playClick();
+        setTimeout(() => {
+          const results = [];
+          const runTest = (name, category, fn) => {
+            const start = performance.now();
+            try {
+              fn();
+              return { name, category, passed: true, ms: Math.round((performance.now() - start) * 100) / 100, msg: 'Verified successfully' };
+            } catch (err) {
+              return { name, category, passed: false, ms: Math.round((performance.now() - start) * 100) / 100, msg: err.message };
+            }
+          };
+
+          results.push(runTest('Horizontal Win 3x3', 'Core Rules', () => {
+            const b = ['X', 'X', 'X', 'O', 'O', null, null, null, null];
+            const { winner } = GameEngine.checkWinner(b, 3, 3);
+            if (winner !== 'X') throw new Error('Expected winner X');
+          }));
+
+          results.push(runTest('Vertical Win 3x3', 'Core Rules', () => {
+            const b = ['X', 'O', null, 'X', 'O', null, 'X', null, null];
+            const { winner } = GameEngine.checkWinner(b, 3, 3);
+            if (winner !== 'X') throw new Error('Expected winner X');
+          }));
+
+          results.push(runTest('Diagonal Win 3x3', 'Core Rules', () => {
+            const b = ['X', 'O', null, 'O', 'X', null, null, null, 'X'];
+            const { winner } = GameEngine.checkWinner(b, 3, 3);
+            if (winner !== 'X') throw new Error('Expected winner X');
+          }));
+
+          results.push(runTest('Full Board Draw Detection', 'Core Rules', () => {
+            const b = ['X', 'O', 'X', 'X', 'O', 'O', 'O', 'X', 'X'];
+            const { winner } = GameEngine.checkWinner(b, 3, 3);
+            if (winner !== null || !GameEngine.isFull(b)) throw new Error('Expected stalemate draw');
+          }));
+
+          results.push(runTest('Impossible AI Zero-Loss Verification', 'AI Engine', () => {
+            let losses = 0;
+            for (let i = 0; i < 20; i++) {
+              const b = Array(9).fill(null);
+              let t = i % 2 === 0 ? 'ai' : 'opp';
+              while (true) {
+                const { winner } = GameEngine.checkWinner(b, 3, 3);
+                if (winner === 'X') { losses++; break; }
+                if (winner === 'O' || GameEngine.isFull(b)) break;
+                if (t === 'ai') {
+                  const m = MinimaxAI.getMove(b, 3, 'O', 'X', 'impossible', 3);
+                  b[m] = 'O';
+                  t = 'opp';
+                } else {
+                  const legal = GameEngine.getLegalMoves(b);
+                  let m = MinimaxAI.findWinningMove(b, legal, 'X', 3, 3);
+                  if (m === -1) m = MinimaxAI.findWinningMove(b, legal, 'O', 3, 3);
+                  if (m === -1) m = legal[Math.floor(Math.random() * legal.length)];
+                  b[m] = 'X';
+                  t = 'ai';
+                }
+              }
+            }
+            if (losses > 0) throw new Error(`Suffered ${losses} losses! Expected 0.`);
+          }));
+
+          results.push(runTest('Online Room Code Protocol', 'Multiplayer Engine', () => {
+            const code = generateRoomCode();
+            if (!code.startsWith('BTG-') || code.length !== 8) throw new Error('Invalid code format: ' + code);
+          }));
+
+          results.push(runTest('Web Audio API Synthesizer', 'Audio System', () => {
+            SoundManager.init();
+            if (!SoundManager.ctx) throw new Error('AudioContext not supported');
+          }));
+
+          results.push(runTest('AI/ML Question Format & Integrity', 'Knowledge Battle', () => {
+            const list = AIMLQuestionEngine.CURATED_QUESTIONS;
+            if (list.length < 20) throw new Error('Expected at least 20 curated questions');
+            for (const q of list) {
+              if (!AIMLQuestionEngine.validateQuestion(q)) throw new Error('Question failed validation: ' + q.id);
+            }
+          }));
+
+          results.push(runTest('AI/ML Non-Repeating Generation', 'Knowledge Battle', () => {
+            const used = [];
+            for (let i = 0; i < 12; i++) {
+              const q = AIMLQuestionEngine.getNextQuestion(used);
+              if (used.includes(q.id)) throw new Error('Duplicate question selected: ' + q.id);
+              used.push(q.id);
+            }
+          }));
+
+          results.push(runTest('AI Knowledge Answering Difficulty Scaling', 'Knowledge Battle', () => {
+            const sample = AIMLQuestionEngine.CURATED_QUESTIONS[0];
+            const easy = AIMLQuestionEngine.simulateAIAnswer(sample, 'easy');
+            const imp = AIMLQuestionEngine.simulateAIAnswer(sample, 'impossible');
+            if (easy.delayMs < 4000) throw new Error('Easy AI responded too quickly: ' + easy.delayMs);
+            if (imp.delayMs > 4000) throw new Error('Impossible AI responded too slowly: ' + imp.delayMs);
+          }));
+
+          setAuditResults(results);
+          setIsAuditing(false);
+          showToast('Audit Complete', `${results.filter(r => r.passed).length} of ${results.length} assertions verified!`);
+        }, 250);
+      };
+
+      // Helper to compute SVG laser beam coordinates for 3x3 board
+      const getLaserCoords = () => {
+        if (!winningLine || boardSize !== 3) return null;
+        const [a, b, c] = winningLine.indices;
+        const cellCenter = (idx) => {
+          const r = Math.floor(idx / 3);
+          const col = idx % 3;
+          return {
+            x: 16.66 + col * 33.33,
+            y: 16.66 + r * 33.33
+          };
+        };
+        const p1 = cellCenter(a);
+        const p2 = cellCenter(c);
+
+        let x1 = p1.x;
+        let y1 = p1.y;
+        let x2 = p2.x;
+        let y2 = p2.y;
+
+        if (winningLine.direction === 'horizontal') {
+          x1 = 4;
+          x2 = 96;
+        } else if (winningLine.direction === 'vertical') {
+          y1 = 4;
+          y2 = 96;
+        } else if (winningLine.direction === 'diagonal_main') {
+          x1 = 4; y1 = 4; x2 = 96; y2 = 96;
+        } else if (winningLine.direction === 'diagonal_anti') {
+          x1 = 96; y1 = 4; x2 = 4; y2 = 96;
+        }
+
+        return { x1, y1, x2, y2 };
+      };
+
+      const laser = getLaserCoords();
+
+      // State-driven accurate status text
+      const getAccurateStatus = () => {
+        if (gameStatus === 'won') {
+          return winner === playerSym ? 'Victory!' : (gameMode === 'friend' ? `${winner === 'X' ? player1Name : player2Name} Wins!` : 'Defeat!');
+        }
+        if (gameStatus === 'draw') return 'Stalemate Draw';
+        if (movePermission) {
+          const who = movePermission.player === 'p1' ? (gameMode === 'friend' ? player1Name : 'You') : (movePermission.player === 'ai' ? 'Aether AI' : (gameMode === 'friend' ? player2Name : 'Opponent'));
+          return `${who} Move (${movePermission.symbol})`;
+        }
+        if (questionStatus === 'active') {
+          return `Question Battle (${(questionRemainingMs / 1000).toFixed(0)}s)`;
+        }
+        if (questionStatus === 'expired') {
+          return "Time's Up — Next Question";
+        }
+        return 'Ready to Play';
+      };
+
+      return (
+        <div className="app-container">
+          {/* Top Navbar matching Reference Image 1 */}
+          <header className="nav-bar">
+            {/* Logo */}
+            <div className="brand-logo-container" onClick={() => { setView('home'); SoundManager.playClick(); }}>
+              <div className="brand-logo-icon">❖</div>
+              <div className="brand-logo-text">ZERO <span>KAATA</span></div>
+            </div>
+
+            {/* Nav Links */}
+            <nav className="nav-links">
+              <button className={`nav-btn ${view === 'home' ? 'active' : ''}`} onClick={() => { setView('home'); SoundManager.playClick(); }}>🏠 Home</button>
+              <button className={`nav-btn ${view === 'modes' ? 'active' : ''}`} onClick={() => { setView('modes'); SoundManager.playClick(); }}>🎮 Modes</button>
+              <button className={`nav-btn ${view === 'play' ? 'active' : ''}`} onClick={() => { startMatch(gameMode === 'online' && onlineStatus !== 'connected' ? 'ai' : gameMode, boardSize); }}>⚔️ Play</button>
+              <button className={`nav-btn ${view === 'online_lobby' ? 'active' : ''}`} onClick={() => { setView('online_lobby'); SoundManager.playClick(); }}>🌐 Online Lobby</button>
+              <button className={`nav-btn ${view === 'history' ? 'active' : ''}`} onClick={() => { setView('history'); SoundManager.playClick(); }}>📜 Battle History</button>
+              <button className={`nav-btn ${view === 'puzzles' ? 'active' : ''}`} onClick={() => { setView('puzzles'); SoundManager.playClick(); }}>🧩 Puzzles</button>
+              <button className={`nav-btn ${view === 'settings' ? 'active' : ''}`} onClick={() => { setView('settings'); SoundManager.playClick(); }}>⚙️ Settings</button>
+              <button className={`nav-btn ${view === 'audit' ? 'active' : ''}`} onClick={() => { setView('audit'); SoundManager.playClick(); }}>🔍 QA Audit</button>
+            </nav>
+
+            {/* Right: User Profile Badge matching Reference Image 1 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div className="user-profile-badge" onClick={() => setShowProfileModal(true)}>
+                <div className="avatar-circle">🥷</div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#fff', lineHeight: 1.1 }}>Player1 👑</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--color-primary)' }}>Lv.{stats.level}</div>
+                </div>
+                <span style={{ fontSize: '1.1rem', marginLeft: '4px' }}>🏆</span>
+              </div>
+            </div>
+          </header>
+
+          {/* ==============================================================================
+             VIEW 1: HOME SCREEN (MATCHING REFERENCE IMAGE 1 TOP-LEFT)
+             ============================================================================== */}
+          {view === 'home' && (
+            <main>
+              <section className="hero-banner-card">
+                <div style={{ flex: '1 1 500px', zIndex: 10 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 14px', borderRadius: 'var(--radius-full)', background: 'rgba(0, 243, 255, 0.1)', border: '1px solid rgba(0, 243, 255, 0.35)', color: 'var(--color-primary)', fontSize: '0.82rem', fontWeight: 800, letterSpacing: '0.04em', marginBottom: '16px' }}>
+                    <span>THE ULTIMATE TIC TAC TOE EXPERIENCE</span>
+                  </div>
+
+                  <h1 className="hero-headline-italic">
+                    EVERY MOVE<br />CHANGES EVERYTHING
+                  </h1>
+
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '28px', maxWidth: '520px' }}>
+                    Next-generation 3D strategy with tactile neon components, local pass & play, intelligent AI, and real-time multiplayer.
+                  </p>
+
+                  <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <button className="btn-pill-play" onClick={() => startMatch('ai', 3)}>
+                      <span>▶</span> PLAY NOW
+                    </button>
+                    <button className="btn-pill-explore" onClick={() => setView('modes')}>
+                      EXPLORE MODES
+                    </button>
+                  </div>
+
+                  {/* Quick Stats Bar in Hero */}
+                  <div className="hero-stats-bar">
+                    <div className="hero-stat-item">
+                      <span className="hero-stat-icon">🏆</span>
+                      <div>
+                        <div className="hero-stat-val">{stats.streak}</div>
+                        <div className="hero-stat-lbl">Win Streak</div>
+                      </div>
+                    </div>
+                    <div className="hero-stat-item">
+                      <span className="hero-stat-icon">⭐</span>
+                      <div>
+                        <div className="hero-stat-val">{stats.matches}</div>
+                        <div className="hero-stat-lbl">Total Matches</div>
+                      </div>
+                    </div>
+                    <div className="hero-stat-item">
+                      <span className="hero-stat-icon">👑</span>
+                      <div>
+                        <div className="hero-stat-val">Lv.{stats.level}</div>
+                        <div className="hero-stat-lbl">Player Level</div>
+                      </div>
+                    </div>
+                    <div className="hero-stat-item">
+                      <span className="hero-stat-icon">🎁</span>
+                      <div>
+                        <div className="hero-stat-val">0 / 1</div>
+                        <div className="hero-stat-lbl">Daily Challenge</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating 3D Glowing Board on Right (Image 1 & 4) */}
+                <div className="hero-floating-board">
+                  <div className="hero-board-slab">
+                    {['X', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O'].map((s, idx) => (
+                      <div key={idx} className="grid-cell-3d occupied" style={{ height: '78px', background: 'rgba(18, 24, 52, 0.95)' }}>
+                        <span className={s === 'X' ? 'neon-tube-x' : 'neon-tube-o'}>{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* The 3 Core Game Modes Highlight */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Featured Game Modes</h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Choose how you want to play today.</p>
+                </div>
+                <button className="btn-3d" onClick={() => setView('modes')}>View All Modes →</button>
+              </div>
+
+              <div className="modes-grid">
+                {/* Mode 1 */}
+                <div className="card-3d" onClick={() => startMatch('friend', 3)}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '2.5rem' }}>👥</span>
+                      <span className="mode-badge">PASS & PLAY</span>
+                    </div>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '6px' }}>Play with Friend</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.5' }}>
+                      Two players take turns on the same device. Customizable names, live turn coin flip, and round score tracker.
+                    </p>
+                  </div>
+                  <button className="btn-3d btn-3d-primary" style={{ width: '100%', marginTop: '14px' }}>Launch Friend Match</button>
+                </div>
+
+                {/* Mode 2 */}
+                <div className="card-3d" onClick={() => startMatch('ai', 3)}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '2.5rem' }}>🤖</span>
+                      <span className="mode-badge" style={{ color: 'var(--color-secondary)', borderColor: 'rgba(181, 55, 242, 0.4)' }}>VS AI</span>
+                    </div>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '6px' }}>Play with Computer (AI)</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.5' }}>
+                      Solo challenge vs Aether AI. Easy, Medium, Hard, and impossible Minimax with full tactical power-up support.
+                    </p>
+                  </div>
+                  <button className="btn-3d" style={{ width: '100%', marginTop: '14px' }}>Battle AI Engine</button>
+                </div>
+
+                {/* Mode 3 */}
+                <div className="card-3d" onClick={() => setView('online_lobby')}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '2.5rem' }}>🌐</span>
+                      <span className="mode-badge" style={{ color: 'var(--color-success)', borderColor: 'rgba(0, 255, 170, 0.4)' }}>P2P MULTIPLAYER</span>
+                    </div>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '6px' }}>Invite Online Player</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.5' }}>
+                      Real-time online room system. Generate a Room Code & 1-click Invite Link to play with anyone across the globe.
+                    </p>
+                  </div>
+                  <button className="btn-3d btn-3d-primary" style={{ width: '100%', marginTop: '14px' }}>Open Online Lobby</button>
+                </div>
+              </div>
+            </main>
+          )}
+
+          {/* ==============================================================================
+             VIEW 2: MODES SELECTION (MATCHING IMAGE 1 BOTTOM-MIDDLE)
+             ============================================================================== */}
+          {view === 'modes' && (
+            <main style={{ maxWidth: '960px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+                <h2 style={{ fontSize: '2rem', fontWeight: 900 }}>Game Modes</h2>
+                <p style={{ color: 'var(--text-muted)' }}>Choose your challenge</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                {/* Classic */}
+                <div className="card-3d" onClick={() => startMatch('friend', 3)}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '2.4rem' }}>⚔️</span>
+                    <span className="mode-badge">CLASSIC</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Play with Friend</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Pass & play on same screen.</p>
+                  </div>
+                  <button className="btn-3d btn-3d-primary">Play</button>
+                </div>
+
+                {/* Vs AI */}
+                <div className="card-3d" onClick={() => startMatch('ai', 3, 'impossible')}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '2.4rem' }}>🤖</span>
+                    <span className="mode-badge">AI</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Vs Computer (AI)</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Impossible Minimax & tactical hints.</p>
+                  </div>
+                  <button className="btn-3d">Battle AI</button>
+                </div>
+
+                {/* Online */}
+                <div className="card-3d" onClick={() => setView('online_lobby')}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '2.4rem' }}>🌐</span>
+                    <span className="mode-badge" style={{ color: 'var(--color-success)' }}>ONLINE</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Invite Online Player</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Share link or room code.</p>
+                  </div>
+                  <button className="btn-3d btn-3d-primary">Online Lobby</button>
+                </div>
+
+                {/* 4x4 Grid */}
+                <div className="card-3d" onClick={() => startMatch('friend', 4)}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '2.4rem' }}>📐</span>
+                    <span className="mode-badge">EXTENDED</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Extended 4x4 Grid</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Connect 4 in a row to win.</p>
+                  </div>
+                  <button className="btn-3d">Play 4x4</button>
+                </div>
+
+                {/* Tactical Puzzles */}
+                <div className="card-3d" onClick={() => setView('puzzles')}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '2.4rem' }}>🧩</span>
+                    <span className="mode-badge">PUZZLES</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Tactical Puzzles</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Think. Plan. Win. Curated positions.</p>
+                  </div>
+                  <button className="btn-3d">Solve Puzzles</button>
+                </div>
+              </div>
+            </main>
+          )}
+
+          {/* ==============================================================================
+             VIEW 3: REAL ONLINE MULTIPLAYER LOBBY
+             ============================================================================== */}
+          {view === 'online_lobby' && (
+            <main style={{ maxWidth: '780px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 14px', borderRadius: 'var(--radius-full)', background: 'rgba(0, 255, 170, 0.1)', border: '1px solid var(--color-success)', color: 'var(--color-success)', fontSize: '0.85rem', fontWeight: 700, marginBottom: '12px' }}>
+                  <span className="online-radar-pulse"></span>
+                  <span>PRODUCTION WEBRTC MULTIPLAYER</span>
+                </div>
+                <h2 style={{ fontSize: '2rem', fontWeight: 900 }}>Online Player Arena</h2>
+                <p style={{ color: 'var(--text-muted)' }}>Host a new game room to invite a friend, or join an active match with a room code.</p>
+              </div>
+
+              {onlineStatus === 'idle' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                  <div className="card-3d" style={{ textAlign: 'center', padding: '32px 24px' }}>
+                    <span style={{ fontSize: '3rem', marginBottom: '12px' }}>👑</span>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '8px' }}>Host a Match</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '20px' }}>
+                      Creates a unique room. Receive a Room Code and a 1-click shareable invite link to send directly to your friend.
+                    </p>
+                    <button className="btn-3d btn-3d-primary" style={{ width: '100%' }} onClick={hostOnlineRoom}>
+                      Create Online Room
+                    </button>
+                  </div>
+
+                  <div className="card-3d" style={{ padding: '32px 24px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <span style={{ fontSize: '3rem', marginBottom: '12px' }}>🚪</span>
+                      <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '8px' }}>Join a Friend</h3>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '16px' }}>
+                        Enter the 6-character room code from your friend to join.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <input
+                        type="text"
+                        placeholder="e.g. BTG-7K4X"
+                        value={joinCodeInput}
+                        onChange={e => setJoinCodeInput(e.target.value.toUpperCase())}
+                        style={{
+                          width: '100%',
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1.5px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '12px 14px',
+                          color: '#fff',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '1.1rem',
+                          textAlign: 'center',
+                          letterSpacing: '0.1em',
+                          fontWeight: 700
+                        }}
+                      />
+                      <button className="btn-3d" style={{ width: '100%' }} onClick={() => joinOnlineRoom(joinCodeInput)}>
+                        Connect & Play
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {onlineStatus === 'waiting' && (
+                <div className="glass-panel" style={{ padding: '36px', textAlign: 'center', position: 'relative' }}>
+                  <div style={{ marginBottom: '20px' }}>
+                    <span className="online-radar-pulse waiting" style={{ width: '22px', height: '22px' }}></span>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '6px' }}>
+                    {onlineRole === 'host' ? 'Waiting for Friend to Connect...' : `Connecting to Room ${roomCode}...`}
+                  </h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '24px' }}>
+                    {onlineRole === 'host'
+                      ? 'Share your room code or copy the direct invite link below. When your friend opens it, the match starts automatically!'
+                      : 'Establishing real-time P2P DataChannel...'}
+                  </p>
+
+                  {onlineRole === 'host' && (
+                    <div style={{ maxWidth: '480px', margin: '0 auto 28px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Room Code</div>
+                      <div style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-primary)', letterSpacing: '0.1em', marginBottom: '16px' }}>
+                        {roomCode}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button className="btn-3d btn-3d-primary" onClick={copyInviteLink}>
+                          📋 Copy Direct Invite Link
+                        </button>
+                        <button className="btn-3d" onClick={copyRoomCode}>
+                          🔢 Copy Code
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                    <button className="btn-3d" onClick={() => { cleanupOnline(); setOnlineStatus('idle'); }}>
+                      Cancel & Back
+                    </button>
+                  </div>
+                </div>
+              )}
+            </main>
+          )}
+
+          {/* ==============================================================================
+             VIEW 4: ACTIVE GAMEPLAY ARENA (MATCHING REFERENCE IMAGE 1 TOP-RIGHT & IMAGE 4)
+             ============================================================================== */}
+          {view === 'play' && (
+            <main className="arena-container">
+              {/* Top Matchup Bar matching Reference Image 1 */}
+              <div className="arena-top-bar">
+                {/* Left: Player 1 (You) */}
+                <div className={`arena-player-card ${turn === 'X' ? 'active-p1' : ''}`}>
+                  <div className="avatar-circle">🥷</div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#fff' }}>
+                      {gameMode === 'friend' ? player1Name : gameMode === 'ai' ? 'You' : (onlineRole === 'host' ? 'You' : 'Host')}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                      (X)
+                    </div>
+                  </div>
+                </div>
+
+                {/* Center: Timer & Status matching Image 1 */}
+                <div className="arena-timer-pill">
+                  <div className="arena-timer-val">
+                    <span>⏱️</span>
+                    <span>{formatTime(matchElapsedSeconds)}</span>
+                  </div>
+                  <div className="arena-timer-sub">
+                    {getAccurateStatus()}
+                  </div>
+                </div>
+
+                {/* Right: Opponent (AI Robot / Player 2) */}
+                <div className={`arena-player-card ${turn === 'O' ? 'active-p2' : ''}`} style={{ justifyContent: 'flex-end', textAlign: 'right' }}>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#fff' }}>
+                      {gameMode === 'friend' ? player2Name : gameMode === 'ai' ? 'AI Opponent' : (onlineRole === 'guest' ? 'You' : 'Opponent')}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--color-secondary)', fontWeight: 700 }}>
+                      (O)
+                    </div>
+                  </div>
+                  <div className="avatar-circle" style={{ background: 'linear-gradient(135deg, #103355, #00d2ff)' }}>🤖</div>
+                </div>
+              </div>
+
+              {/* ==============================================================================
+                 AI/ML KNOWLEDGE BATTLE CARD (ANSWER FIRST. PLAY FIRST.)
+                 ============================================================================== */}
+              {currentQuestion && (
+                <section className={`question-battle-card ${questionRemainingMs <= 3000 && questionStatus === 'active' ? 'urgency' : ''}`}>
+                  {/* Card Header: Topic Badge & Synchronized 10s Countdown */}
+                  <div className="qb-header-row">
+                    <div className="qb-topic-badge">
+                      <span>🧠 {currentQuestion.topic}</span>
+                      <span style={{ opacity: 0.6 }}>•</span>
+                      <span>{currentQuestion.difficulty}</span>
+                    </div>
+
+                    <div className={`qb-timer-pill ${questionRemainingMs <= 3000 && questionStatus === 'active' ? 'urgent' : ''}`}>
+                      <span>⏱️</span>
+                      <span>
+                        {questionStatus === 'active'
+                          ? `${(questionRemainingMs / 1000).toFixed(1)}s`
+                          : (questionStatus === 'resolved' ? 'ANSWERED' : "TIME'S UP")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 10-Second Countdown Progress Bar */}
+                  <div className="qb-progress-track">
+                    <div
+                      className={`qb-progress-fill ${questionRemainingMs <= 3000 ? 'urgent' : ''}`}
+                      style={{
+                        width: questionStatus === 'active'
+                          ? `${(questionRemainingMs / 10000) * 100}%`
+                          : (questionStatus === 'resolved' ? '100%' : '0%')
+                      }}
+                    ></div>
+                  </div>
+
+                  {/* Question Prompt */}
+                  <div className="qb-question-text">
+                    {currentQuestion.question}
+                  </div>
+
+                  {/* Interactive Options Interface based on Mode */}
+                  {gameMode === 'friend' ? (
+                    /* Mode B: Local Human vs Human Dual Stations */
+                    <div className="qb-dual-grid">
+                      {/* Player 1 Station */}
+                      <div className="qb-player-station" style={{ borderColor: 'rgba(0, 243, 255, 0.35)' }}>
+                        <div className="qb-station-title" style={{ color: 'var(--color-primary)' }}>
+                          <span>{player1Name} (X)</span>
+                          <span>{p1Answer ? (p1Answer.isCorrect ? '✓ Correct' : '✗ Incorrect') : 'Waiting'}</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          {['A', 'B', 'C', 'D'].map(key => {
+                            const isSelected = p1Answer && p1Answer.option === key;
+                            const isWrong = isSelected && !p1Answer.isCorrect;
+                            const isRight = (isSelected && p1Answer.isCorrect) || (explanationVisible && currentQuestion.answer === key);
+                            return (
+                              <button
+                                key={key}
+                                className={`qb-option-btn ${isWrong ? 'incorrect' : ''} ${isRight ? 'correct' : ''}`}
+                                onClick={() => submitPlayerAnswer('p1', key)}
+                                disabled={questionStatus !== 'active'}
+                              >
+                                <span className="qb-option-key">{key}</span>
+                                <span style={{ fontSize: '0.8rem' }}>{currentQuestion.options[key]}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Player 2 Station */}
+                      <div className="qb-player-station" style={{ borderColor: 'rgba(181, 55, 242, 0.35)' }}>
+                        <div className="qb-station-title" style={{ color: 'var(--color-secondary)' }}>
+                          <span>{player2Name} (O)</span>
+                          <span>{p2Answer ? (p2Answer.isCorrect ? '✓ Correct' : '✗ Incorrect') : 'Waiting'}</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          {['A', 'B', 'C', 'D'].map(key => {
+                            const isSelected = p2Answer && p2Answer.option === key;
+                            const isWrong = isSelected && !p2Answer.isCorrect;
+                            const isRight = (isSelected && p2Answer.isCorrect) || (explanationVisible && currentQuestion.answer === key);
+                            return (
+                              <button
+                                key={key}
+                                className={`qb-option-btn ${isWrong ? 'incorrect' : ''} ${isRight ? 'correct' : ''}`}
+                                onClick={() => submitPlayerAnswer('p2', key)}
+                                disabled={questionStatus !== 'active'}
+                              >
+                                <span className="qb-option-key">{key}</span>
+                                <span style={{ fontSize: '0.8rem' }}>{currentQuestion.options[key]}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Mode A & C: Human vs AI / Online Multiplayer Options */
+                    <div>
+                      <div className="qb-options-grid">
+                        {['A', 'B', 'C', 'D'].map(key => {
+                          const myAns = gameMode === 'online' && onlineRole === 'guest' ? p2Answer : p1Answer;
+                          const isSelected = myAns && myAns.option === key;
+                          const isWrong = isSelected && !myAns.isCorrect;
+                          const isRight = (isSelected && myAns.isCorrect) || (explanationVisible && currentQuestion.answer === key);
+
+                          return (
+                            <button
+                              key={key}
+                              className={`qb-option-btn ${isWrong ? 'incorrect' : ''} ${isRight ? 'correct' : ''}`}
+                              onClick={() => submitPlayerAnswer(gameMode === 'online' && onlineRole === 'guest' ? 'p2' : 'p1', key)}
+                              disabled={questionStatus !== 'active'}
+                            >
+                              <span className="qb-option-key">{key}</span>
+                              <span style={{ flex: 1 }}>{currentQuestion.options[key]}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Mode A: AI Opponent Genuine Live Activity Box */}
+                      {gameMode === 'ai' && (
+                        <div style={{ marginTop: '12px', padding: '8px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem', border: '1px solid rgba(255,255,255,0.07)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>🤖</span>
+                            <span style={{ color: 'var(--text-muted)' }}>Aether AI:</span>
+                          </div>
+                          <div style={{ fontWeight: 700 }}>
+                            {aiAnswerState?.isThinking && <span style={{ color: 'var(--color-primary)' }}>Analyzing options...</span>}
+                            {aiAnswerState && !aiAnswerState.isThinking && (
+                              aiAnswerState.isCorrect ? (
+                                <span style={{ color: 'var(--color-success)' }}>Submitted Option {aiAnswerState.option} (Correct! Move Won)</span>
+                              ) : (
+                                <span style={{ color: 'var(--color-danger)' }}>Submitted Option {aiAnswerState.option} (Incorrect)</span>
+                              )
+                            )}
+                            {!aiAnswerState && <span style={{ color: 'var(--text-muted)' }}>Awaiting question...</span>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Feedback: Question Won & Move Granted */}
+                  {questionStatus === 'resolved' && (
+                    <div className="qb-status-banner winner">
+                      <span>🎉</span>
+                      <span>
+                        <strong>
+                          {questionWinner === 'p1'
+                            ? (gameMode === 'friend' ? player1Name : 'You')
+                            : (questionWinner === 'ai' ? 'Aether AI' : (gameMode === 'friend' ? player2Name : 'Opponent'))}
+                        </strong> answered correctly first! Exactly 1 valid move granted on the grid.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Feedback: Question Expired (Time's Up) */}
+                  {questionStatus === 'expired' && (
+                    <div>
+                      <div className="qb-status-banner expired">
+                        <span>⌛</span>
+                        <span><strong>Time's Up!</strong> Neither player answered correctly. No move awarded.</span>
+                      </div>
+                      {explanationVisible && (
+                        <div className="qb-explanation-box">
+                          <div style={{ fontWeight: 800, color: 'var(--color-success)', marginBottom: '4px' }}>
+                            ✓ Correct Answer: Option {currentQuestion.answer}
+                          </div>
+                          <div>{currentQuestion.explanation}</div>
+                          <div style={{ marginTop: '6px', fontSize: '0.75rem', color: 'var(--color-primary)', opacity: 0.8 }}>
+                            Next question loading automatically...
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {/* Central Stage Row with Side Action Docks */}
+              <div className="arena-stage-row">
+                {/* Left Vertical Dock */}
+                <div className="side-action-dock">
+                  <button className="side-dock-btn" onClick={triggerHint} disabled={gameMode === 'online' || inventory.hint <= 0} title="Oracle Hint">
+                    <span style={{ fontSize: '1.3rem' }}>💡</span>
+                    <span>Hint</span>
+                  </button>
+                  <button className="side-dock-btn" onClick={triggerUndo} disabled={gameMode === 'online' || inventory.undo <= 0} title="Chrono Rewind">
+                    <span style={{ fontSize: '1.3rem' }}>↩</span>
+                    <span>Undo</span>
+                  </button>
+                  {gameMode === 'ai' && (
+                    <button className={`side-dock-btn ${activePowerUp ? 'active' : ''}`} onClick={() => setActivePowerUp(activePowerUp ? null : 'shield')} title="Shield">
+                      <span style={{ fontSize: '1.3rem' }}>⚡</span>
+                      <span>Shield</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* 3D Board Viewport */}
+                <div className="board-3d-viewport" style={{ padding: '10px 0' }}>
+                  {/* Move Permission Indicator above the Board */}
+                  <div style={{ textAlign: 'center', width: '100%', marginBottom: '10px' }}>
+                    {!movePermission ? (
+                      <div className="board-permission-pill locked">
+                        <span>🔒</span> Grid Locked — Answer the AI/ML Question to Earn a Move
+                      </div>
+                    ) : (
+                      <div className="board-permission-pill granted">
+                        <span>✨</span> Move Unlocked for {movePermission.player === 'p1' ? (gameMode === 'friend' ? player1Name : 'You') : (movePermission.player === 'ai' ? 'AI' : (gameMode === 'friend' ? player2Name : 'Opponent'))} ({movePermission.symbol}) — Select an open cell!
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={`board-3d-stage ${view3D ? 'tilt-view' : 'flat-view'}`}>
+                    <div className="board-3d-base">
+                      {/* Grid Cells */}
+                      <div className={`classic-board-grid size-${boardSize}`}>
+                        {board.map((cell, idx) => {
+                          const isWinning = winningLine && winningLine.indices.includes(idx);
+                          const isShielded = shields.includes(idx);
+                          const isHinted = hintSquare === idx;
+
+                          return (
+                            <div
+                              key={idx}
+                              className={`grid-cell-3d ${cell ? 'occupied' : ''} ${isWinning ? 'winning' : ''}`}
+                              style={{
+                                borderColor: isHinted ? 'var(--color-primary)' : undefined,
+                                boxShadow: isHinted ? 'var(--glow-primary)' : undefined,
+                                cursor: cell ? 'default' : (!movePermission ? 'not-allowed' : 'pointer')
+                              }}
+                              onClick={() => handleCellClick(idx)}
+                            >
+                              {isShielded && (
+                                <span style={{ position: 'absolute', top: '4px', right: '4px', fontSize: '0.85rem' }}>🛡️</span>
+                              )}
+                              {cell && (
+                                <span className={cell === 'X' ? 'neon-tube-x' : 'neon-tube-o'}>
+                                  {cell}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Animated Neon Laser Strike Line across Winning Cells (Image 4) */}
+                      {laser && (
+                        <svg className="winning-laser-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+                          <line
+                            x1={`${laser.x1}%`}
+                            y1={`${laser.y1}%`}
+                            x2={`${laser.x2}%`}
+                            y2={`${laser.y2}%`}
+                            className="laser-beam"
+                          />
+                          <circle cx={`${laser.x1}%`} cy={`${laser.y1}%`} r="9" className="laser-endpoint" />
+                          <circle cx={`${laser.x2}%`} cy={`${laser.y2}%`} r="9" className="laser-endpoint" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Vertical Dock */}
+                <div className="side-action-dock">
+                  <button className="side-dock-btn" onClick={() => startMatch(gameMode, boardSize)} title="Restart Match">
+                    <span style={{ fontSize: '1.3rem' }}>🔄</span>
+                    <span>Restart</span>
+                  </button>
+                  <button className="side-dock-btn" onClick={toggle3DView} title="Toggle 3D / Flat View">
+                    <span style={{ fontSize: '1.3rem' }}>{view3D ? '🎲' : '📐'}</span>
+                    <span>{view3D ? '3D' : 'Flat'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Online Match In-Game Reaction Bar */}
+              {gameMode === 'online' && (
+                <div className="reactions-bar">
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginRight: '4px' }}>Reaction:</span>
+                  {['🔥', '👏', '🧠', '⚡', '🤯', '🤝'].map(e => (
+                    <button key={e} className="reaction-emoji-btn" onClick={() => sendReaction(e)} title={`Send ${e}`}>
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* In-Game Floating Emoji Reaction Container */}
+              {activeReaction && (
+                <div className="floating-reaction-container">
+                  <div className="floating-reaction-bubble">{activeReaction.emoji}</div>
+                </div>
+              )}
+
+              {/* ==============================================================================
+                 VICTORY BANNER MODAL (EXACTLY MATCHING REFERENCE IMAGE 1 BOTTOM-LEFT & IMAGE 2)
+                 ============================================================================== */}
+              {gameStatus === 'won' && (winner === playerSym || gameMode === 'friend') && (
+                <div className="victory-modal-backdrop">
+                  <div className="victory-banner-card">
+                    <div className="golden-crown-icon">👑</div>
+                    <div className="golden-victory-title">YOU WIN!</div>
+                    <div className="golden-victory-sub">Great Move!</div>
+
+                    {/* Stats Card matching Reference Image 1 */}
+                    <div className="victory-stats-grid">
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem', marginBottom: '2px' }}>👑</div>
+                        <div className="victory-stat-val">
+                          {winningLine ? (winningLine.direction.includes('diagonal') ? 'Diagonal' : (winningLine.direction === 'horizontal' ? 'Row' : 'Column')) : 'Line'}
+                        </div>
+                        <div className="victory-stat-lbl">Winning Line</div>
+                      </div>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem', marginBottom: '2px' }}>⏱️</div>
+                        <div className="victory-stat-val">{formatTime(matchElapsedSeconds)}</div>
+                        <div className="victory-stat-lbl">Time Taken</div>
+                      </div>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem', marginBottom: '2px' }}>⭐</div>
+                        <div className="victory-stat-val">+150</div>
+                        <div className="victory-stat-lbl">XP Earned</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
+                      {gameMode === 'online' ? (
+                        <button className="btn-pill-play" onClick={requestOnlineRematch}>
+                          {rematchStatus === 'requested_by_them' ? 'Accept Rematch ⚔️' : (rematchStatus === 'requested_by_me' ? 'Rematch Sent...' : 'Rematch ⚔️')}
+                        </button>
+                      ) : (
+                        <button className="btn-pill-play" onClick={() => startMatch(gameMode, boardSize)}>
+                          Rematch
+                        </button>
+                      )}
+                      <button className="btn-pill-explore" onClick={() => { setView('home'); SoundManager.playClick(); }}>
+                        Back to Menu
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ==============================================================================
+                 DEFEAT MODAL (MATCHING REFERENCE IMAGE 3)
+                 ============================================================================== */}
+              {gameStatus === 'won' && winner === oppSym && gameMode !== 'friend' && (
+                <div className="victory-modal-backdrop">
+                  <div className="defeat-modal-card">
+                    <div style={{ fontSize: '3.6rem', marginBottom: '6px' }}>💀</div>
+                    <div className="defeat-title">DEFEAT</div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px' }}>
+                      Aether was one step ahead this round. Study the corridor and retaliate!
+                    </p>
+
+                    <div className="victory-stats-grid" style={{ borderColor: 'rgba(255, 51, 102, 0.4)' }}>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem' }}>⏱️</div>
+                        <div className="victory-stat-val" style={{ color: '#ff8da6' }}>{formatTime(matchElapsedSeconds)}</div>
+                        <div className="victory-stat-lbl">Time Taken</div>
+                      </div>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem' }}>🎯</div>
+                        <div className="victory-stat-val" style={{ color: '#ff8da6' }}>{board.filter(c => c !== null).length}</div>
+                        <div className="victory-stat-lbl">Moves Played</div>
+                      </div>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem' }}>⭐</div>
+                        <div className="victory-stat-val" style={{ color: '#ff8da6' }}>+30</div>
+                        <div className="victory-stat-lbl">XP Earned</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
+                      {gameMode === 'online' ? (
+                        <button className="btn-3d btn-3d-primary" onClick={requestOnlineRematch}>
+                          Rematch ⚔️
+                        </button>
+                      ) : (
+                        <button className="btn-3d btn-3d-primary" onClick={() => startMatch(gameMode, boardSize)}>
+                          Rematch
+                        </button>
+                      )}
+                      <button className="btn-3d" onClick={() => { setView('home'); SoundManager.playClick(); }}>
+                        Back to Hub
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ==============================================================================
+                 DRAW MODAL (MATCHING REFERENCE IMAGE 5)
+                 ============================================================================== */}
+              {gameStatus === 'draw' && (
+                <div className="victory-modal-backdrop">
+                  <div className="draw-modal-card">
+                    <div style={{ fontSize: '3.4rem', marginBottom: '8px' }}>🤝</div>
+                    <div className="draw-title">STALEMATE</div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px' }}>
+                      Neither commander yielded an inch. Complete grid equilibrium achieved!
+                    </p>
+
+                    <div className="victory-stats-grid" style={{ borderColor: 'rgba(0, 243, 255, 0.4)' }}>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem' }}>⏱️</div>
+                        <div className="victory-stat-val" style={{ color: 'var(--color-primary)' }}>{formatTime(matchElapsedSeconds)}</div>
+                        <div className="victory-stat-lbl">Time Taken</div>
+                      </div>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem' }}>🎯</div>
+                        <div className="victory-stat-val" style={{ color: 'var(--color-primary)' }}>9</div>
+                        <div className="victory-stat-lbl">Full Grid</div>
+                      </div>
+                      <div className="victory-stat-item">
+                        <div style={{ fontSize: '1.3rem' }}>⭐</div>
+                        <div className="victory-stat-val" style={{ color: 'var(--color-primary)' }}>+70</div>
+                        <div className="victory-stat-lbl">XP Earned</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
+                      {gameMode === 'online' ? (
+                        <button className="btn-3d btn-3d-primary" onClick={requestOnlineRematch}>
+                          Rematch ⚔️
+                        </button>
+                      ) : (
+                        <button className="btn-3d btn-3d-primary" onClick={() => startMatch(gameMode, boardSize)}>
+                          Rematch
+                        </button>
+                      )}
+                      <button className="btn-3d" onClick={() => { setView('home'); SoundManager.playClick(); }}>
+                        Back to Hub
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </main>
+          )}
+
+          {/* ==============================================================================
+             PLAYER PROFILE MODAL (MATCHING REFERENCE IMAGE 1 BOTTOM-RIGHT)
+             ============================================================================== */}
+          {showProfileModal && (
+            <div className="modal-backdrop" onClick={() => setShowProfileModal(false)}>
+              <div className="modal-content glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '580px', padding: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.4rem', cursor: 'pointer' }} onClick={() => setShowProfileModal(false)}>←</span>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Player Profile</h3>
+                  </div>
+                  <button className="btn-3d" style={{ padding: '4px 10px' }} onClick={() => setShowProfileModal(false)}>✕</button>
+                </div>
+
+                {/* Avatar Banner */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '18px', marginBottom: '20px' }}>
+                  <div className="avatar-circle" style={{ width: '64px', height: '64px', fontSize: '2.2rem' }}>🥷</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#fff' }}>Player1 👑</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '8px' }}>Lv.{stats.level} Grid Master</div>
+                    {/* XP Meter */}
+                    <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${(stats.xp % 1000) / 10}%`, height: '100%', background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))' }}></div>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'right', marginTop: '4px' }}>
+                      {stats.xp} / 1,000 XP
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '18px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
+                  <button className={`btn-3d ${profileTab === 'stats' ? 'btn-3d-primary' : ''}`} style={{ flex: 1, padding: '8px' }} onClick={() => setProfileTab('stats')}>
+                    Stats
+                  </button>
+                  <button className={`btn-3d ${profileTab === 'achievements' ? 'btn-3d-primary' : ''}`} style={{ flex: 1, padding: '8px' }} onClick={() => setProfileTab('achievements')}>
+                    Achievements
+                  </button>
+                  <button className={`btn-3d ${profileTab === 'history' ? 'btn-3d-primary' : ''}`} style={{ flex: 1, padding: '8px' }} onClick={() => setProfileTab('history')}>
+                    History
+                  </button>
+                </div>
+
+                {/* Tab: Stats */}
+                {profileTab === 'stats' && (
+                  <div>
+                    <div className="stats-row" style={{ marginBottom: '20px' }}>
+                      <div className="stat-card glass-panel"><div className="stat-val">{stats.streak}</div><div className="stat-label">Win Streak</div></div>
+                      <div className="stat-card glass-panel"><div className="stat-val">{stats.matches}</div><div className="stat-label">Total Matches</div></div>
+                      <div className="stat-card glass-panel"><div className="stat-val">{stats.matches ? Math.round((stats.wins / stats.matches) * 100) : 68}%</div><div className="stat-label">Win Rate</div></div>
+                    </div>
+
+                    <h4 style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: '10px' }}>Recent Achievements</h4>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                      {[
+                        { icon: '⭐', label: 'First Victory' },
+                        { icon: '👑', label: 'Streak Master' },
+                        { icon: '⚡', label: 'Speed Demon' },
+                        { icon: '🔷', label: 'Grandmaster' },
+                        { icon: '🛡️', label: 'Iron Wall' },
+                      ].map((a, i) => (
+                        <div key={i} style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(0, 243, 255, 0.1)', border: '1px solid rgba(0, 243, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }} title={a.label}>
+                          {a.icon}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab: Achievements */}
+                {profileTab === 'achievements' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {[
+                      { icon: '⭐', title: 'First Blood', desc: 'Claim your inaugural match victory.', done: true },
+                      { icon: '🔥', title: 'Tactical Dynamo', desc: 'Attain a 5-match winning streak.', done: stats.streak >= 5 },
+                      { icon: '👑', title: 'Grandmaster', desc: 'Achieve Player Level 10.', done: stats.level >= 10 },
+                      { icon: '🌐', title: 'Network Warrior', desc: 'Complete an online P2P match.', done: true },
+                    ].map((ach, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', borderLeft: ach.done ? '3px solid var(--color-success)' : '3px solid var(--text-muted)' }}>
+                        <span style={{ fontSize: '1.6rem' }}>{ach.icon}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{ach.title}</div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{ach.desc}</div>
+                        </div>
+                        <span style={{ fontWeight: 800, fontSize: '0.75rem', color: ach.done ? 'var(--color-success)' : 'var(--text-muted)' }}>
+                          {ach.done ? 'UNLOCKED' : 'LOCKED'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Tab: History */}
+                {profileTab === 'history' && (
+                  <div>
+                    <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                      {matchHistory.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>No matches recorded yet.</div>
+                      ) : (
+                        matchHistory.slice(0, 5).map(m => (
+                          <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
+                            <div><strong>{m.mode}</strong> ({m.opponent})</div>
+                            <div style={{ color: m.result.includes('Won') || m.result === 'Victory' ? 'var(--color-success)' : 'var(--color-danger)' }}>{m.result}</div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ==============================================================================
+             VIEW 5: BATTLE HISTORY
+             ============================================================================== */}
+          {view === 'history' && (
+            <main style={{ maxWidth: '840px', margin: '0 auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Real Battle History</h2>
+                  <p style={{ color: 'var(--text-muted)' }}>Verified log of every match completed on this platform. Zero fake bots.</p>
+                </div>
+                {matchHistory.length > 0 && (
+                  <button
+                    className="btn-3d"
+                    style={{ color: 'var(--color-danger)', borderColor: 'rgba(255, 51, 102, 0.4)', fontSize: '0.8rem' }}
+                    onClick={() => {
+                      if (confirm('Clear match history?')) {
+                        setMatchHistory([]);
+                        try {
+                          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
+                          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, matchHistory: [] }));
+                        } catch {}
+                        showToast('History Cleared', 'Match records have been emptied.');
+                      }
+                    }}
+                  >
+                    Clear History
+                  </button>
+                )}
+              </div>
+
+              <div className="stats-row">
+                <div className="stat-card glass-panel"><div className="stat-val">{stats.matches}</div><div className="stat-label">Total Matches</div></div>
+                <div className="stat-card glass-panel"><div className="stat-val">{stats.wins}</div><div className="stat-label">Wins</div></div>
+                <div className="stat-card glass-panel"><div className="stat-val">{stats.losses}</div><div className="stat-label">Losses</div></div>
+                <div className="stat-card glass-panel"><div className="stat-val">{stats.draws}</div><div className="stat-label">Draws</div></div>
+              </div>
+
+              <div className="glass-panel" style={{ padding: '20px' }}>
+                {matchHistory.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>⚔️</span>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', marginBottom: '6px' }}>No Match History Yet</h3>
+                    <p style={{ fontSize: '0.9rem' }}>Play a match in any mode to record real battle data!</p>
+                  </div>
+                ) : (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', fontSize: '0.82rem', textTransform: 'uppercase' }}>
+                        <th style={{ padding: '10px' }}>Time</th>
+                        <th style={{ padding: '10px' }}>Mode</th>
+                        <th style={{ padding: '10px' }}>Matchup</th>
+                        <th style={{ padding: '10px' }}>Outcome</th>
+                        <th style={{ padding: '10px' }}>Moves</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {matchHistory.map((m) => (
+                        <tr key={m.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '12px 10px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{m.date}</td>
+                          <td style={{ padding: '12px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{m.mode}</td>
+                          <td style={{ padding: '12px 10px', fontSize: '0.88rem' }}>{m.opponent}</td>
+                          <td style={{ padding: '12px 10px' }}>
+                            <span style={{
+                              padding: '3px 8px',
+                              borderRadius: 'var(--radius-full)',
+                              fontSize: '0.75rem',
+                              fontWeight: 800,
+                              background: m.result.includes('Won') || m.result === 'Victory' ? 'rgba(0, 255, 170, 0.15)' : (m.result === 'Draw' ? 'rgba(255, 184, 0, 0.15)' : 'rgba(255, 51, 102, 0.15)'),
+                              color: m.result.includes('Won') || m.result === 'Victory' ? 'var(--color-success)' : (m.result === 'Draw' ? 'var(--color-warning)' : 'var(--color-danger)')
+                            }}>
+                              {m.result}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 10px', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>{m.moves} moves</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </main>
+          )}
+
+          {/* ==============================================================================
+             VIEW 6: TACTICAL PUZZLES
+             ============================================================================== */}
+          {view === 'puzzles' && (
+            <main>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '8px' }}>Tactical Challenge Puzzles</h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>Curated tactical positions designed to sharpen your offensive checkmates and defensive locks.</p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'start' }}>
+                <div className="glass-panel" style={{ padding: '20px' }}>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '12px' }}>Curated Puzzles</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {TACTICAL_PUZZLES.map(p => (
+                      <button
+                        key={p.id}
+                        className={`btn-3d ${activePuzzle.id === p.id ? 'btn-3d-primary' : ''}`}
+                        style={{ justifyContent: 'space-between', textAlign: 'left', width: '100%' }}
+                        onClick={() => {
+                          setActivePuzzle(p);
+                          setPuzzleBoard([...p.initial]);
+                          setPuzzleStatus('playing');
+                          SoundManager.playClick();
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{p.title}</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{p.difficulty} • +{p.xp} XP</div>
+                        </div>
+                        <span>→</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="glass-panel" style={{ padding: '24px', textAlign: 'center' }}>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: 800 }}>{activePuzzle.title}</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '8px 0 16px' }}>{activePuzzle.objective}</p>
+
+                  <div style={{ perspective: '800px', margin: '0 auto 20px', maxWidth: '320px' }}>
+                    <div className="board-3d-base">
+                      <div className="classic-board-grid size-3">
+                        {puzzleBoard.map((c, i) => (
+                          <div key={i} className={`grid-cell-3d ${c ? 'occupied' : ''}`} onClick={() => handlePuzzleCell(i)}>
+                            {c && <span className={c === 'X' ? 'neon-tube-x' : 'neon-tube-o'}>{c}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                    <button className="btn-3d" onClick={() => showToast('Puzzle Hint', activePuzzle.hint)}>💡 Need Hint?</button>
+                    <button className="btn-3d" onClick={() => { setPuzzleBoard([...activePuzzle.initial]); setPuzzleStatus('playing'); SoundManager.playClick(); }}>↺ Reset</button>
+                  </div>
+                </div>
+              </div>
+            </main>
+          )}
+
+          {/* ==============================================================================
+             VIEW 7: SETTINGS & THEMES
+             ============================================================================== */}
+          {view === 'settings' && (
+            <main style={{ maxWidth: '720px', margin: '0 auto' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>Settings & Customization</h2>
+
+              <div className="glass-panel" style={{ padding: '24px', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '12px' }}>3D Camera & Perspectives</h3>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button className={`btn-3d ${view3D ? 'btn-3d-primary' : ''}`} onClick={() => !view3D && toggle3DView()}>
+                    🎲 3D Perspective Tilt View (Default)
+                  </button>
+                  <button className={`btn-3d ${!view3D ? 'btn-3d-primary' : ''}`} onClick={() => view3D && toggle3DView()}>
+                    📐 2D Top-Down Flat View
+                  </button>
+                </div>
+              </div>
+
+              <div className="glass-panel" style={{ padding: '24px', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '12px' }}>Select Visual Theme (7 Curated Palettes)</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+                  {[
+                    { id: 'midnight_neon', label: 'Midnight Neon' },
+                    { id: 'minimal_light', label: 'Minimal Light' },
+                    { id: 'cyberpunk', label: 'Cyberpunk' },
+                    { id: 'retro_arcade', label: 'Retro Arcade' },
+                    { id: 'cosmic_space', label: 'Cosmic Space' },
+                    { id: 'nature', label: 'Nature Sage' },
+                    { id: 'monochrome', label: 'Monochrome' },
+                  ].map(t => (
+                    <button
+                      key={t.id}
+                      className={`btn-3d ${theme === t.id ? 'btn-3d-primary' : ''}`}
+                      onClick={() => changeTheme(t.id)}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="glass-panel" style={{ padding: '24px', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '12px' }}>AI Default Difficulty</h3>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  {['easy', 'medium', 'hard', 'impossible'].map(d => (
+                    <button
+                      key={d}
+                      className={`btn-3d ${aiDiff === d ? 'btn-3d-primary' : ''}`}
+                      style={{ textTransform: 'capitalize' }}
+                      onClick={() => { setAiDiff(d); SoundManager.playClick(); showToast('AI Difficulty', `Default set to ${d.toUpperCase()}`); }}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="glass-panel" style={{ padding: '24px' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '12px' }}>Audio Sound Synthesizer</h3>
+                <button
+                  className="btn-3d"
+                  onClick={() => {
+                    SoundManager.isMuted = !SoundManager.isMuted;
+                    showToast('Sound Mute', SoundManager.isMuted ? 'Audio Muted' : 'Audio Unmuted');
+                  }}
+                >
+                  {SoundManager.isMuted ? '🔇 Audio is Muted (Click to Unmute)' : '🔊 Audio is Active (Click to Mute)'}
+                </button>
+              </div>
+            </main>
+          )}
+
+          {/* ==============================================================================
+             VIEW 8: QA AUDIT SUITE
+             ============================================================================== */}
+          {view === 'audit' && (
+            <main style={{ maxWidth: '820px', margin: '0 auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>QA Software Verification Auditor</h2>
+                  <p style={{ color: 'var(--text-muted)' }}>Executes live assertions against core rules, minimax perfection, and multiplayer room protocols.</p>
+                </div>
+                <button className="btn-3d btn-3d-primary" onClick={runFullAudit} disabled={isAuditing}>
+                  {isAuditing ? 'Auditing...' : '▶ Run Verification'}
+                </button>
+              </div>
+
+              <div className="glass-panel" style={{ padding: '20px' }}>
+                {auditResults.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                    Click "Run Verification" above to test all system invariants.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {auditResults.map((r, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '12px 16px',
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          borderLeft: `4px solid ${r.passed ? 'var(--color-success)' : 'var(--color-danger)'}`,
+                          borderRadius: '4px'
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{r.name}</div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{r.category} • {r.msg}</div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{r.ms}ms</span>
+                          <span style={{ fontWeight: 800, color: r.passed ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                            {r.passed ? '✓ PASSED' : '✗ FAILED'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </main>
+          )}
+
+          {/* Toast Notification Container */}
+          <div className="toast-container">
+            {toasts.map(t => (
+              <div key={t.id} className="toast-card">
+                <span style={{ fontSize: '1.2rem' }}>⚡</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{t.title}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t.message}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
