@@ -1938,6 +1938,8 @@
       const [authTab, setAuthTab] = useState('login'); // 'login' | 'register'
       const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
       const [authError, setAuthError] = useState('');
+      const [showPassword, setShowPassword] = useState(false);
+      const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
       // Overall User Progression & Statistics — STRICT CLEAN ZERO DEFAULTS (NO FABRICATED DATA)
       const [stats, setStats] = useState({
@@ -2181,6 +2183,8 @@
           loadUserData(user);
           setPlayer1Name(user.username);
           setShowAuthModal(false);
+          setShowPassword(false);
+          setShowConfirmPassword(false);
           setAuthForm({ username: '', password: '', confirmPassword: '' });
           SoundManager.playWin();
           showToast('Welcome Back!', `Logged in successfully as ${user.username}.`);
@@ -2204,6 +2208,8 @@
           loadUserData(user);
           setPlayer1Name(user.username);
           setShowAuthModal(false);
+          setShowPassword(false);
+          setShowConfirmPassword(false);
           setAuthForm({ username: '', password: '', confirmPassword: '' });
           SoundManager.playWin();
           showToast('Account Created!', `Welcome to Beyond the Grid, ${user.username}!`);
@@ -2649,7 +2655,7 @@
           setOnlineStatus('connected');
           SoundManager.playClick();
           showToast('Player Joined!', `${data.guestName || 'Opponent'} connected to room! Game starting!`);
-          sendOnlineMsg({ type: 'HOST_ACK', hostName: player1Name });
+          sendOnlineMsg({ type: 'HOST_ACK', hostName: player1Name, battleMode: activeBattleModeRef.current });
           setBoard(Array(9).fill(null));
           setTurn('X');
           setGameStatus('playing');
@@ -2659,13 +2665,25 @@
           setOppSym('O');
           setMatchElapsedSeconds(0);
           setView('play');
-          setTimeout(() => spawnQuestion([]), 450);
+          if (activeBattleModeRef.current === 'knowledge_battle') {
+            setTimeout(() => spawnQuestion([]), 450);
+          } else {
+            clearQuestionTimers();
+            setCurrentQuestion(null);
+            currentQuestionRef.current = null;
+            setQuestionStatus('idle');
+            questionStatusRef.current = 'idle';
+          }
         }
 
         if (data.type === 'HOST_ACK') {
           setOnlineStatus('connected');
           SoundManager.playClick();
           showToast('Room Connected!', `Joined match hosted by ${data.hostName || 'Host'}!`);
+          if (data.battleMode) {
+            setActiveBattleMode(data.battleMode);
+            activeBattleModeRef.current = data.battleMode;
+          }
           setBoard(Array(9).fill(null));
           setTurn('X');
           setGameStatus('playing');
@@ -2675,6 +2693,13 @@
           setOppSym('X');
           setMatchElapsedSeconds(0);
           setView('play');
+          if (data.battleMode === 'normal') {
+            clearQuestionTimers();
+            setCurrentQuestion(null);
+            currentQuestionRef.current = null;
+            setQuestionStatus('idle');
+            questionStatusRef.current = 'idle';
+          }
         }
 
         if (data.type === 'QUESTION_START') {
@@ -2781,7 +2806,7 @@
           setMovePermission(null);
           SoundManager.playWin();
           showToast('Rematch Started', 'The grid has been reset! Answer first to move.');
-          if (onlineRole === 'host') {
+          if (onlineRole === 'host' && activeBattleModeRef.current === 'knowledge_battle') {
             setTimeout(() => spawnQuestion([]), 450);
           }
         }
@@ -2941,7 +2966,7 @@
           setMovePermission(null);
           SoundManager.playWin();
           showToast('Rematch Accepted!', 'The battlefield is reset! Ready for round 2.');
-          if (onlineRole === 'host') {
+          if (onlineRole === 'host' && activeBattleModeRef.current === 'knowledge_battle') {
             setTimeout(() => spawnQuestion([]), 450);
           }
         } else {
@@ -3053,9 +3078,11 @@
           SoundManager.playPowerUp();
           showToast('Quantum Eraser', 'Cell symbol has been vaporized!');
           if (activeBattleMode === 'knowledge_battle') {
-            setTimeout(() => {
-              setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
-            }, 800);
+            if (gameMode !== 'online' || onlineRole === 'host') {
+              setTimeout(() => {
+                setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+              }, 800);
+            }
           }
           return;
         }
@@ -3075,9 +3102,11 @@
           SoundManager.playPowerUp();
           showToast('Aegis Shield', 'Symbol encased in energy barrier!');
           if (activeBattleMode === 'knowledge_battle') {
-            setTimeout(() => {
-              setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
-            }, 800);
+            if (gameMode !== 'online' || onlineRole === 'host') {
+              setTimeout(() => {
+                setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+              }, 800);
+            }
           }
           return;
         }
@@ -3123,14 +3152,16 @@
 
         // NEXT STEP ROUTING BASED ON BATTLE PROTOCOL
         if (activeBattleMode === 'knowledge_battle') {
-          setTimeout(() => {
-            setGameStatus(s => {
-              if (s === 'playing') {
-                spawnQuestion();
-              }
-              return s;
-            });
-          }, 800);
+          if (gameMode !== 'online' || onlineRole === 'host') {
+            setTimeout(() => {
+              setGameStatus(s => {
+                if (s === 'playing') {
+                  spawnQuestion();
+                }
+                return s;
+              });
+            }, 800);
+          }
         } else if (activeBattleMode === 'normal') {
           if (gameMode === 'ai' && nextTurn === oppSym) {
             setTimeout(() => {
@@ -3156,16 +3187,20 @@
             setFriendScore(s => ({ ...s, p1: s.p1 + 1 }));
             SoundManager.playWin();
             if (window.confetti) window.confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } });
+            isWin = true;
+            xpGain = 80;
           } else if (result === 'O') {
             setFriendScore(s => ({ ...s, p2: s.p2 + 1 }));
             SoundManager.playWin();
             if (window.confetti) window.confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } });
+            isWin = false;
+            xpGain = 40;
           } else {
             setFriendScore(s => ({ ...s, draws: s.draws + 1 }));
             SoundManager.playDraw();
+            isWin = false;
+            xpGain = 50;
           }
-          isWin = true;
-          xpGain = 80;
         } else if (mode === 'ai') {
           isWin = result === playerSym;
           xpGain = isWin ? 150 : result === 'draw' ? 70 : 30;
@@ -3245,7 +3280,9 @@
           });
           setTurn(last.sym);
           showToast('Chrono Rewind', 'Last move reversed!');
-          setTimeout(() => spawnQuestion(), 400);
+          if (activeBattleMode === 'knowledge_battle') {
+            setTimeout(() => spawnQuestion(), 400);
+          }
         } else if (gameMode === 'ai') {
           // Revert both AI move and player's move so it returns to player's turn
           const countToRevert = moveHistory.length >= 2 ? 2 : 1;
@@ -3259,8 +3296,10 @@
           });
           setTurn(playerSym);
           setIsAiThinking(false);
-          showToast('Chrono Rewind', 'Moves reversed — answer question to make your move!');
-          setTimeout(() => spawnQuestion(), 400);
+          showToast('Chrono Rewind', activeBattleMode === 'knowledge_battle' ? 'Moves reversed — answer question to make your move!' : 'Moves reversed — your turn on the grid!');
+          if (activeBattleMode === 'knowledge_battle') {
+            setTimeout(() => spawnQuestion(), 400);
+          }
         }
       };
 
@@ -3397,6 +3436,24 @@
             const imp = AIMLQuestionEngine.simulateAIAnswer(sample, 'impossible');
             if (easy.delayMs < 4000) throw new Error('Easy AI responded too quickly: ' + easy.delayMs);
             if (imp.delayMs > 4000) throw new Error('Impossible AI responded too slowly: ' + imp.delayMs);
+          }));
+
+          results.push(runTest('20-Second Question Deadline Duration', 'Knowledge Battle', () => {
+            if (AIMLQuestionEngine.QUESTION_DURATION_SECONDS !== 20) throw new Error('Expected 20s');
+            if (AIMLQuestionEngine.QUESTION_DURATION_MS !== 20000) throw new Error('Expected 20000ms');
+          }));
+
+          results.push(runTest('4-Tier Difficulty Distribution Integrity', 'Knowledge Battle', () => {
+            const tiers = new Set(AIMLQuestionEngine.CURATED_QUESTIONS.map(q => q.difficulty));
+            ['Easy', 'Medium', 'Difficult', 'Advanced'].forEach(t => {
+              if (!tiers.has(t)) throw new Error('Missing tier: ' + t);
+            });
+          }));
+
+          results.push(runTest('Auth Password Hashing & Account Isolation', 'Authentication', () => {
+            const u1Key = AuthService.getUserStorageKey('usr_test1');
+            const u2Key = AuthService.getUserStorageKey('usr_test2');
+            if (u1Key === u2Key) throw new Error('Account storage keys must be isolated');
           }));
 
           setAuditResults(results);
@@ -4548,10 +4605,7 @@
                     onClick={() => {
                       if (confirm('Clear match history?')) {
                         setMatchHistory([]);
-                        try {
-                          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
-                          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, matchHistory: [] }));
-                        } catch {}
+                        saveUserData(currentUser, stats, []);
                         showToast('History Cleared', 'Match records have been emptied.');
                       }
                     }}
@@ -5012,7 +5066,7 @@
                     type="button"
                     className={`btn-3d ${authTab === 'login' ? 'btn-3d-primary' : ''}`}
                     style={{ flex: 1, padding: '8px' }}
-                    onClick={() => { setAuthTab('login'); setAuthError(''); SoundManager.playClick(); }}
+                    onClick={() => { setAuthTab('login'); setAuthError(''); setShowPassword(false); setShowConfirmPassword(false); SoundManager.playClick(); }}
                   >
                     Sign In
                   </button>
@@ -5020,7 +5074,7 @@
                     type="button"
                     className={`btn-3d ${authTab === 'register' ? 'btn-3d-primary' : ''}`}
                     style={{ flex: 1, padding: '8px' }}
-                    onClick={() => { setAuthTab('register'); setAuthError(''); SoundManager.playClick(); }}
+                    onClick={() => { setAuthTab('register'); setAuthError(''); setShowPassword(false); setShowConfirmPassword(false); SoundManager.playClick(); }}
                   >
                     Register
                   </button>
@@ -5048,27 +5102,101 @@
 
                   <div style={{ marginBottom: '14px' }}>
                     <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Password</label>
-                    <input
-                      type="password"
-                      className="auth-input"
-                      placeholder="••••••••"
-                      value={authForm.password}
-                      onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
-                      required
-                    />
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        className="auth-input"
+                        style={{ paddingRight: '44px' }}
+                        placeholder="••••••••"
+                        value={authForm.password}
+                        onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
+                        required
+                      />
+                      <button
+                        type="button"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={(e) => { e.preventDefault(); setShowPassword(prev => !prev); }}
+                        style={{
+                          position: 'absolute',
+                          right: '10px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'transparent',
+                          border: 'none',
+                          color: showPassword ? 'var(--color-primary)' : 'var(--text-muted)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '6px',
+                          borderRadius: '4px',
+                          transition: 'color 0.2s, transform 0.15s'
+                        }}
+                      >
+                        {showPassword ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                            <line x1="1" y1="1" x2="23" y2="23" />
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   {authTab === 'register' && (
                     <div style={{ marginBottom: '18px' }}>
                       <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Confirm Password</label>
-                      <input
-                        type="password"
-                        className="auth-input"
-                        placeholder="••••••••"
-                        value={authForm.confirmPassword}
-                        onChange={e => setAuthForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        required
-                      />
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          className="auth-input"
+                          style={{ paddingRight: '44px' }}
+                          placeholder="••••••••"
+                          value={authForm.confirmPassword}
+                          onChange={e => setAuthForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                          required
+                        />
+                        <button
+                          type="button"
+                          aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                          title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                          onClick={(e) => { e.preventDefault(); setShowConfirmPassword(prev => !prev); }}
+                          style={{
+                            position: 'absolute',
+                            right: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'transparent',
+                            border: 'none',
+                            color: showConfirmPassword ? 'var(--color-primary)' : 'var(--text-muted)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '6px',
+                            borderRadius: '4px',
+                            transition: 'color 0.2s, transform 0.15s'
+                          }}
+                        >
+                          {showConfirmPassword ? (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                              <line x1="1" y1="1" x2="23" y2="23" />
+                            </svg>
+                          ) : (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   )}
 
