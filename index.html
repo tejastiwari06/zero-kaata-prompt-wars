@@ -55,6 +55,73 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
+    /* Modal Backdrop & Dialog System (Centered in Viewport) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(4, 7, 18, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 16px;
+      overflow-y: auto;
+      box-sizing: border-box;
+      animation: modal-backdrop-in 0.2s ease-out;
+    }
+
+    @keyframes modal-backdrop-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      position: relative;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: auto;
+      background: linear-gradient(150deg, rgba(20, 26, 58, 0.98) 0%, rgba(10, 14, 34, 0.99) 100%);
+      border: 1.5px solid rgba(0, 243, 255, 0.45);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 243, 255, 0.2);
+      box-sizing: border-box;
+      animation: modal-dialog-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modal-dialog-pop {
+      from { transform: scale(0.92) translateY(14px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .auth-input {
+      width: 100%;
+      background: rgba(14, 18, 42, 0.95);
+      border: 1.5px solid rgba(79, 110, 247, 0.35);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-family: var(--font-main);
+      outline: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .auth-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 16px rgba(0, 243, 255, 0.3);
+      background: rgba(22, 28, 64, 0.98);
+    }
+
     .nav-links {
       display: flex;
       align-items: center;
@@ -898,12 +965,300 @@
     // AI/ML KNOWLEDGE BATTLE: HIGH-CALIBER QUESTION REPOSITORY & PROCEDURAL ENGINE
     // ==============================================================================
     class AIMLQuestionEngine {
+      static QUESTION_DURATION_SECONDS = 20;
+      static QUESTION_DURATION_MS = 20000;
+
       static CURATED_QUESTIONS = [
+        // --- TIER 1: EASY (~20% target) ---
         {
-          id: 'ml_q1',
+          id: 'ml_easy_1',
+          topic: 'Supervised Learning',
+          difficulty: 'Easy',
+          question: 'Which machine learning paradigm uses labeled input-output pairs to train a mapping function?',
+          options: {
+            A: 'Supervised Learning',
+            B: 'Unsupervised Clustering',
+            C: 'Self-Supervised Contrastive Learning',
+            D: 'Model-Free Reinforcement Learning'
+          },
+          answer: 'A',
+          explanation: 'Supervised learning trains models on labeled datasets where each input vector x is paired with a known ground-truth output label y.'
+        },
+        {
+          id: 'ml_easy_2',
+          topic: 'Activation Functions',
+          difficulty: 'Easy',
+          question: 'What is the mathematical output range of the standard logistic Sigmoid function sigma(z) = 1 / (1 + exp(-z))?',
+          options: {
+            A: '(0, 1)',
+            B: '[-1, 1]',
+            C: '[0, +inf)',
+            D: '(-inf, +inf)'
+          },
+          answer: 'A',
+          explanation: 'The logistic sigmoid function asymptotically maps any real number to the open interval (0, 1), making it ideal for interpreting scalar outputs as Bernoulli probabilities.'
+        },
+        {
+          id: 'ml_easy_3',
+          topic: 'Loss Functions',
+          difficulty: 'Easy',
+          question: 'Which loss function is standard for evaluating continuous regression models by penalizing larger errors quadratically?',
+          options: {
+            A: 'Mean Squared Error (MSE)',
+            B: 'Binary Cross-Entropy Loss',
+            C: 'Categorical Cross-Entropy',
+            D: 'Hinge Loss'
+          },
+          answer: 'A',
+          explanation: 'MSE computes (1/N) * sum (y_i - y_hat_i)^2. The squaring operation penalizes larger residuals proportionally more than smaller ones.'
+        },
+        {
+          id: 'ml_easy_4',
+          topic: 'Model Evaluation',
+          difficulty: 'Easy',
+          question: 'In a binary classification confusion matrix, what is the exact formula for Accuracy?',
+          options: {
+            A: '(TP + TN) / (TP + TN + FP + FN)',
+            B: 'TP / (TP + FP)',
+            C: 'TP / (TP + FN)',
+            D: '2 * (Precision * Recall) / (Precision + Recall)'
+          },
+          answer: 'A',
+          explanation: 'Accuracy is the ratio of correctly classified predictions (True Positives + True Negatives) to total evaluated samples.'
+        },
+        {
+          id: 'ml_easy_5',
+          topic: 'Generalization & Overfitting',
+          difficulty: 'Easy',
+          question: 'When a model achieves near-zero error on training data but performs poorly on unseen test data, what is this called?',
+          options: {
+            A: 'Overfitting',
+            B: 'Underfitting',
+            C: 'High Bias',
+            D: 'Under-parameterization'
+          },
+          answer: 'A',
+          explanation: 'Overfitting occurs when a high-capacity model memorizes noise and idiosyncrasies in the training set rather than learning generalizable patterns.'
+        },
+        {
+          id: 'ml_easy_6',
+          topic: 'Neural Networks',
+          difficulty: 'Easy',
+          question: 'Why are non-linear activation functions necessary between layers of a multi-layer neural network?',
+          options: {
+            A: 'Without non-linearities, any stack of linear layers collapses mathematically into a single linear transformation.',
+            B: 'They prevent all weights from becoming negative.',
+            C: 'They eliminate the need to calculate backpropagation gradients.',
+            D: 'They enforce sparse zero weights at initialization.'
+          },
+          answer: 'A',
+          explanation: 'Since matrix multiplication is linear, W2 * (W1 * x) = (W2 * W1) * x = W_comb * x. Non-linear activations allow networks to approximate arbitrary non-linear functions.'
+        },
+        {
+          id: 'ml_easy_7',
+          topic: 'Optimization',
+          difficulty: 'Easy',
+          question: 'What hyperparameter controls the step size taken along the negative gradient direction during gradient descent?',
+          options: {
+            A: 'Learning rate (eta)',
+            B: 'Batch size',
+            C: 'Momentum coefficient',
+            D: 'Weight decay lambda'
+          },
+          answer: 'A',
+          explanation: 'In parameter update theta_{t+1} = theta_t - eta * grad_L, eta (learning rate) directly scales the gradient step size.'
+        },
+        {
+          id: 'ml_easy_8',
+          topic: 'Unsupervised Learning',
+          difficulty: 'Easy',
+          question: 'Which algorithm is a classic iterative centroid-based clustering technique that partitions data into k distinct clusters?',
+          options: {
+            A: 'K-Means Clustering',
+            B: 'Random Forest',
+            C: 'Linear Discriminant Analysis',
+            D: 'Support Vector Machine'
+          },
+          answer: 'A',
+          explanation: 'K-Means alternates between assigning points to the nearest centroid and updating centroids to the mean of assigned points until convergence.'
+        },
+
+        // --- TIER 2: MEDIUM (~35% target) ---
+        {
+          id: 'ml_med_1',
+          topic: 'Bias-Variance Tradeoff',
+          difficulty: 'Medium',
+          question: 'In the bias-variance decomposition of expected test MSE, what does the bias term measure?',
+          options: {
+            A: 'Error resulting from erroneous or overly simplistic assumptions in the learning algorithm.',
+            B: 'Sensitivity of model predictions to small fluctuations in the training dataset.',
+            C: 'Irreducible noise inherent to the data-generating process sigma^2.',
+            D: 'The condition number of the feature covariance matrix.'
+          },
+          answer: 'A',
+          explanation: 'Bias measures how far the expected model prediction across infinite training draws deviates from the true underlying function. High bias implies underfitting.'
+        },
+        {
+          id: 'ml_med_2',
+          topic: 'Regularization',
+          difficulty: 'Medium',
+          question: 'What is the primary structural difference between L1 (Lasso) and L2 (Ridge) weight penalties in linear models?',
+          options: {
+            A: 'L1 penalizes absolute weights inducing sparsity (exact zeros); L2 penalizes squared weights shrinking them smoothly.',
+            B: 'L2 eliminates features completely while L1 retains all features with small weights.',
+            C: 'L1 is strictly restricted to positive features while L2 allows negative features.',
+            D: 'L2 requires non-differentiable subgradient optimization.'
+          },
+          answer: 'A',
+          explanation: 'L1 has non-differentiable sharp corners along the coordinate axes where the loss contours intersect at zero, causing feature selection. L2 penalizes squared norms smoothly toward zero.'
+        },
+        {
+          id: 'ml_med_3',
+          topic: 'Convolutional Neural Networks',
+          difficulty: 'Medium',
+          question: 'What is the primary purpose of a Max Pooling layer in a Convolutional Neural Network (CNN)?',
+          options: {
+            A: 'Downsampling spatial dimensions to reduce computation and provide local translational invariance.',
+            B: 'Increasing channel dimensionality to capture fine-grained texture features.',
+            C: 'Normalizing activation values to zero mean and unit variance.',
+            D: 'Projecting feature vectors onto orthogonal latent subspaces.'
+          },
+          answer: 'A',
+          explanation: 'Max pooling extracts the maximum activation in local spatial windows (e.g. 2x2), halving spatial height and width while retaining the strongest feature responses.'
+        },
+        {
+          id: 'ml_med_4',
+          topic: 'Backpropagation',
+          difficulty: 'Medium',
+          question: 'What fundamental calculus principle enables computing gradients through arbitrary compositions of differentiable layers in deep networks?',
+          options: {
+            A: 'The Chain Rule of differentiation',
+            B: 'L\'Hopital\'s Rule',
+            C: 'The Mean Value Theorem',
+            D: 'Taylor Series Truncation'
+          },
+          answer: 'A',
+          explanation: 'Backpropagation applies the Chain Rule recursively from the loss layer back to shallow layers: dL/dx = (dL/dy) * (dy/dx).'
+        },
+        {
+          id: 'ml_med_5',
+          topic: 'Data Leakage',
+          difficulty: 'Medium',
+          question: 'Why must feature normalization (e.g. StandardScaler) be fit exclusively on training data and not the full dataset before splitting?',
+          options: {
+            A: 'Fitting on the full dataset leaks information about the mean and variance of the test set into the training process.',
+            B: 'StandardScaler throws a runtime exception if the test set is included.',
+            C: 'Test set feature values are always strictly non-negative.',
+            D: 'Fitting on training data guarantees zero variance for all features.'
+          },
+          answer: 'A',
+          explanation: 'Computing mean and variance over the combined train+test sets is a subtle form of data leakage, producing overly optimistic validation metrics that degrade in production.'
+        },
+        {
+          id: 'ml_med_6',
+          topic: 'Cross-Validation',
+          difficulty: 'Medium',
+          question: 'In standard k-fold cross-validation with k = 5, what percentage of the dataset is used for model training in each fold iteration?',
+          options: {
+            A: '80%',
+            B: '20%',
+            C: '50%',
+            D: '95%'
+          },
+          answer: 'A',
+          explanation: 'The dataset is partitioned into 5 equal folds. In each iteration, 4 folds (80%) train the model and 1 fold (20%) evaluates it.'
+        },
+        {
+          id: 'ml_med_7',
+          topic: 'Word Embeddings',
+          difficulty: 'Medium',
+          question: 'What is the objective of the Word2Vec Skip-gram model during training?',
+          options: {
+            A: 'Predicting surrounding context words given a target center word within a sliding window.',
+            B: 'Predicting the target center word given a bag of surrounding context words.',
+            C: 'Computing singular value decomposition on global co-occurrence matrices.',
+            D: 'Encoding documents into fixed-length topic distribution vectors.'
+          },
+          answer: 'A',
+          explanation: 'Skip-gram takes center word w_t and maximizes the log probability of context words w_{t+j} within window size c using softmax over dot products.'
+        },
+        {
+          id: 'ml_med_8',
+          topic: 'Attention Basics',
+          difficulty: 'Medium',
+          question: 'In Scaled Dot-Product Attention Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V, why is the inner product scaled by sqrt(d_k)?',
+          options: {
+            A: 'To prevent dot products from growing excessively large in high dimensions, which pushes softmax into vanishing gradient regions.',
+            B: 'To regularize the rank of the resulting attention matrix to rank 1.',
+            C: 'To ensure the value vectors V have zero mean.',
+            D: 'To enforce orthogonality between query and key projection matrices.'
+          },
+          answer: 'A',
+          explanation: 'For independent zero-mean unit-variance components, the variance of QK^T is d_k. Dividing by sqrt(d_k) restores unit variance, preventing softmax saturation.'
+        },
+        {
+          id: 'ml_med_9',
+          topic: 'Vanishing Gradients',
+          difficulty: 'Medium',
+          question: 'Why does the standard sigmoid activation function cause vanishing gradients in deep feedforward architectures with many layers?',
+          options: {
+            A: 'Its derivative attains a maximum of only 0.25, exponentially shrinking gradient magnitudes when chained across multiple layers.',
+            B: 'Its derivative is discontinuous at z = 0.',
+            C: 'It produces strictly negative activation values.',
+            D: 'It causes weight matrices to become singular.'
+          },
+          answer: 'A',
+          explanation: 'Since d sigma / dz = sigma(z)*(1 - sigma(z)) <= 0.25, multiplying derivatives across L layers shrinks the backpropagated gradient by at least 0.25^L, causing vanishing gradients.'
+        },
+        {
+          id: 'ml_med_10',
+          topic: 'Overfitting Mitigation',
+          difficulty: 'Medium',
+          question: 'How does Dropout behave during training versus inference in a deep neural network?',
+          options: {
+            A: 'Units are randomly set to zero with probability p during training; at inference, all units are active and outputs are scaled by (1 - p).',
+            B: 'Units are dropped at inference time to speed up model latency.',
+            C: 'Dropout adds Gaussian noise to the weights during both training and inference.',
+            D: 'Dropout computes moving averages of layer activations during training.'
+          },
+          answer: 'A',
+          explanation: 'During training, dropout samples subnetworks by zeroing activations with probability p. At inference, weights or activations are scaled by (1 - p) to preserve expected activation magnitude.'
+        },
+        {
+          id: 'ml_med_11',
+          topic: 'Optimization',
+          difficulty: 'Medium',
+          question: 'In Stochastic Gradient Descent (SGD) with momentum, what is the role of the momentum term?',
+          options: {
+            A: 'Accelerating updates along consistent gradient dimensions while dampening oscillations in high-curvature directions.',
+            B: 'Dynamically increasing the learning rate whenever gradients become small.',
+            C: 'Clipping the maximum norm of parameter weight tensors.',
+            D: 'Computing exact second-order Hessian inverses.'
+          },
+          answer: 'A',
+          explanation: 'Momentum accumulates exponentially decaying moving averages of past gradients: v_t = gamma * v_{t-1} + eta * g_t, stabilizing descent trajectories.'
+        },
+        {
+          id: 'ml_med_12',
+          topic: 'Evaluation Metrics',
+          difficulty: 'Medium',
+          question: 'When evaluating a binary classifier under severe class imbalance (e.g. 99% negative, 1% positive), why is standard Accuracy misleading?',
+          options: {
+            A: 'A trivial classifier predicting all negatives attains 99% accuracy while detecting zero true positives.',
+            B: 'Accuracy cannot be computed when negative samples exceed positive samples.',
+            C: 'Accuracy is only mathematically defined for multi-class classification.',
+            D: 'The confusion matrix cannot be constructed under class imbalance.'
+          },
+          answer: 'A',
+          explanation: 'Because negatives dominate the denominator, trivial majority-class predictions yield high accuracy despite complete failure on the minority class of interest.'
+        },
+
+        // --- TIER 3: DIFFICULT (~30% target) ---
+        {
+          id: 'ml_diff_1',
           topic: 'Contrastive Learning',
-          difficulty: 'Research',
-          question: 'Why does contrastive learning (e.g., SimCLR NT-Xent loss) benefit critically from temperature scaling tau in the softmax denominator?',
+          difficulty: 'Difficult',
+          question: 'Why does contrastive learning (e.g. SimCLR NT-Xent loss) benefit critically from temperature scaling tau in the softmax denominator?',
           options: {
             A: 'It prevents the gradient of hard negatives from vanishing by tuning distribution sharpness.',
             B: 'It guarantees that representation norms collapse to a single uniform point on the hypersphere.',
@@ -914,107 +1269,107 @@
           explanation: 'Temperature tau controls sensitivity to hard negative samples: lower tau penalizes hard negatives more aggressively, preventing uniform representation collapse while maintaining gradient signal.'
         },
         {
-          id: 'ml_q2',
+          id: 'ml_diff_2',
           topic: 'Transformers & Attention',
-          difficulty: 'Advanced',
+          difficulty: 'Difficult',
           question: 'In FlashAttention-2, what key algorithmic insight enables a ~2-4x speedup over standard Multi-Head Attention on modern GPUs?',
           options: {
-            A: 'Replacing the softmax nonlinearity with a piecewise linear ReLU approximation.',
-            B: 'Tiling inputs into SRAM blocks and online softmax scaling to avoid materializing the full N x N matrix in HBM.',
+            A: 'Tiling inputs into SRAM blocks and online softmax scaling to avoid materializing the full N x N matrix in HBM.',
+            B: 'Replacing the softmax nonlinearity with a piecewise linear ReLU approximation.',
             C: 'Pruning 75% of query-key inner products based on magnitude thresholding.',
             D: 'Distributing query projections across CPU threads via asynchronous PCI-e DMA transfers.'
           },
-          answer: 'B',
-          explanation: 'FlashAttention computes exact attention by tiling Q, K, and V into fast GPU SRAM, maintaining running softmax normalization statistics (online softmax) without writing intermediate N x N attention matrix to slow HBM.'
+          answer: 'A',
+          explanation: 'FlashAttention computes exact attention by tiling Q, K, and V into fast GPU SRAM, maintaining running softmax normalization statistics without writing intermediate N x N attention matrices to slow HBM.'
         },
         {
-          id: 'ml_q3',
+          id: 'ml_diff_3',
           topic: 'Deep Learning Optimization',
-          difficulty: 'Advanced',
+          difficulty: 'Difficult',
           question: 'In the Adam optimizer, why are first (m_t) and second (v_t) moment estimates corrected by (1 - beta_1^t) and (1 - beta_2^t)?',
           options: {
-            A: 'To regularize weight decay linearly with the current epoch step count.',
-            B: 'To eliminate the initialization bias toward zero during early optimization steps.',
+            A: 'To eliminate the initialization bias toward zero during early optimization steps.',
+            B: 'To regularize weight decay linearly with the current epoch step count.',
             C: 'To dynamically modulate the learning rate according to spectral norm upper bounds.',
             D: 'To enforce orthogonal updates across distinct parameter sub-tensors.'
           },
-          answer: 'B',
-          explanation: 'Since m_0 and v_0 are initialized to zero, exponential moving averages are heavily biased toward zero in early iterations. Dividing by (1 - beta^t) yields unbiased estimators since E[m_t] = E[g_t].'
+          answer: 'A',
+          explanation: 'Because m_0 and v_0 are initialized to zero, exponential moving averages are heavily biased toward zero in early iterations. Dividing by (1 - beta^t) yields unbiased estimators.'
         },
         {
-          id: 'ml_q4',
-          topic: 'Parameter-Efficient Fine-Tuning',
-          difficulty: 'Advanced',
-          question: 'In Low-Rank Adaptation (LoRA), how are adapter weight matrices A in R^{r x d_in} and B in R^{d_out x r} typically initialized before fine-tuning?',
-          options: {
-            A: 'Both A and B are initialized to identity matrices I_r.',
-            B: 'Both A and B are initialized with zero vectors.',
-            C: 'A is initialized with Gaussian noise and B is initialized to zero, so Delta W = B*A = 0 at step 0.',
-            D: 'A is initialized to zero and B is initialized with Xavier uniform noise.'
-          },
-          answer: 'C',
-          explanation: 'Setting B = 0 and A ~ N(0, sigma^2) ensures that the perturbation Delta W = B * A is strictly zero at the beginning of training, preserving the pre-trained model outputs.'
-        },
-        {
-          id: 'ml_q5',
+          id: 'ml_diff_4',
           topic: 'Deep Learning Architectures',
-          difficulty: 'Advanced',
+          difficulty: 'Difficult',
           question: 'What is the primary operational difference between Layer Normalization (LayerNorm) and Batch Normalization (BatchNorm) at inference time?',
           options: {
-            A: 'LayerNorm requires caching running population statistics, whereas BatchNorm computes them dynamically.',
-            B: 'BatchNorm uses fixed running mean/variance tracked during training, whereas LayerNorm computes statistics per sample across channels/features dynamically.',
+            A: 'BatchNorm uses fixed running mean/variance tracked during training, whereas LayerNorm computes statistics per sample across channels/features dynamically.',
+            B: 'LayerNorm requires caching running population statistics, whereas BatchNorm computes them dynamically.',
             C: 'LayerNorm is strictly restricted to 1D signals and cannot normalize spatial activations.',
             D: 'BatchNorm normalizes across hidden feature dimensions independently for each sequence token.'
           },
-          answer: 'B',
-          explanation: 'BatchNorm uses frozen running mean and variance vectors accumulated during training at inference. LayerNorm computes mean and variance dynamically on each individual sample across feature dimensions, independent of batch size.'
+          answer: 'A',
+          explanation: 'BatchNorm uses frozen running mean and variance vectors accumulated during training. LayerNorm computes mean and variance dynamically on each individual sample across feature dimensions.'
         },
         {
-          id: 'ml_q6',
-          topic: 'Reinforcement Learning & Alignment',
-          difficulty: 'Research',
-          question: 'In Direct Preference Optimization (DPO), how is the policy objective derived from traditional RLHF with a Bradley-Terry reward model?',
+          id: 'ml_diff_5',
+          topic: 'Residual Connections',
+          difficulty: 'Difficult',
+          question: 'What is the theoretical justification for the residual connection x + F(x) in ResNets preventing vanishing gradients?',
           options: {
-            A: 'By training an explicit neural reward model and taking Monte Carlo policy rollouts.',
-            B: 'By expressing the ground-truth reward analytically as the implicit log-ratio of policy to reference probabilities: r(x,y) = beta * log(pi_theta(y|x) / pi_ref(y|x)).',
-            C: 'By replacing cross-entropy loss with mean squared error over preferred token logits.',
-            D: 'By optimizing actor-critic networks using Generalized Advantage Estimation over human ranking scores.'
+            A: 'The gradient dE/dx = dE/dy * (I + dF/dx) includes an identity term I, ensuring a direct highway for gradient propagation regardless of dF/dx.',
+            B: 'It multiplies the gradient Jacobian by an orthogonal unitary factor at every layer.',
+            C: 'It replaces non-convex loss surfaces with strictly quadratic bowls.',
+            D: 'It constrains all weight eigenvalues to lie strictly inside the complex unit circle.'
           },
-          answer: 'B',
-          explanation: 'DPO uses the closed-form relationship between optimal policy and reward function in Bradley-Terry preference models, substituting r(x,y) = beta * log(pi / pi_ref) directly into the loss, completely bypassing explicit reward modeling.'
+          answer: 'A',
+          explanation: 'By the chain rule, dE/dx_l = dE/dx_L * (I + sum dF/dx), so gradients can flow directly from output layer L back to shallow layer l without vanishing exponentially.'
         },
         {
-          id: 'ml_q7',
-          topic: 'Mathematics of Machine Learning',
-          difficulty: 'Research',
-          question: 'For two continuous probability distributions P and Q, what does the Kullback-Leibler divergence D_KL(P || Q) quantify, and what is its symmetry property?',
+          id: 'ml_diff_6',
+          topic: 'Self-Supervised Learning',
+          difficulty: 'Difficult',
+          question: 'In Masked Autoencoders (MAE), why can the ViT encoder process only a small fraction (e.g. 25%) of visible image patches, while standard BERT must process 100% of tokens?',
           options: {
-            A: 'It is a symmetric Euclidean metric quantifying the geometric distance between covariance matrices.',
-            B: 'It quantifies the relative entropy (information loss) when using Q to approximate P; it is non-negative and generally asymmetric.',
-            C: 'It measures the total variation bounded between -1 and +1, satisfying the triangle inequality.',
-            D: 'It computes the cosine angle between probability density gradient vectors on a Riemannian manifold.'
+            A: 'MAE completely deletes masked patch tokens before feeding them to the encoder, processing only unmasked tokens to save compute.',
+            B: 'Images have lower spatial dimensionality than natural language tokens.',
+            C: 'MAE uses 2D spatial convolution instead of self-attention.',
+            D: 'Visible patches are merged using pixel average pooling.'
           },
-          answer: 'B',
-          explanation: 'KL divergence D_KL(P || Q) = int P(x) log(P(x)/Q(x)) dx measures expected information loss using distribution Q to approximate true distribution P. By Gibbs inequality, D_KL(P || Q) >= 0, with equality iff P = Q almost everywhere; in general D_KL(P || Q) != D_KL(Q || P).'
+          answer: 'A',
+          explanation: 'MAE discards masked patches completely during the heavy encoder pass, executing self-attention only on the 25% visible patches. Mask tokens are only introduced in the lightweight decoder.'
         },
         {
-          id: 'ml_q8',
-          topic: 'Machine Learning Theory',
-          difficulty: 'Advanced',
-          question: 'Why does L1 (Lasso) regularization induce sparse weights whereas L2 (Ridge) regularization yields diffuse, non-zero weights?',
+          id: 'ml_diff_7',
+          topic: 'Model Distillation',
+          difficulty: 'Difficult',
+          question: 'In Hinton-style knowledge distillation, what is the role of temperature T in the teacher and student softened softmax distributions?',
           options: {
-            A: 'L1 penalizes small weights more gently than large weights.',
-            B: 'The L1 norm is non-differentiable at w_i = 0 with a subgradient interval [-lambda, lambda], causing contours to hit coordinate axes at vertices.',
-            C: 'L2 regularization eliminates gradient flow whenever weights become negative.',
-            D: 'L1 optimization requires solving closed-form normal equations directly.'
+            A: 'Higher T softens probabilities, revealing rich "dark knowledge" (relative similarities across negative non-target classes).',
+            B: 'Higher T drives the output toward a discrete one-hot vector.',
+            C: 'Lower T prevents the student gradients from overflowing.',
+            D: 'T scales the learning rate exponentially with model depth.'
           },
-          answer: 'B',
-          explanation: 'The L1 diamond-shaped constraint region has sharp corners on the coordinate axes where gradients have non-zero subgradient components, pushing non-critical weights exactly to zero.'
+          answer: 'A',
+          explanation: 'At T=1, probabilities of incorrect classes are nearly zero. Elevating T softens the distribution, revealing structural similarities between classes that the teacher discovered.'
         },
         {
-          id: 'ml_q9',
-          topic: 'Transformers & Positional Encodings',
-          difficulty: 'Advanced',
+          id: 'ml_diff_8',
+          topic: 'Optimization & Numerical Stability',
+          difficulty: 'Difficult',
+          question: 'In deep network loss functions, why is Cross-Entropy formulated using log-sum-exp stabilization instead of naive exp(z_i) / sum exp(z_j)?',
+          options: {
+            A: 'Subtracting max(z) before exp prevents numerical overflow (inf) while adding a log shift prevents underflow to 0.',
+            B: 'It reduces the asymptotic complexity of softmax from O(N) to O(log N).',
+            C: 'It forces logits to be strictly orthogonal to the ground-truth one-hot label.',
+            D: 'It removes negative eigenvalues from the loss Hessian matrix.'
+          },
+          answer: 'A',
+          explanation: 'For large logits z_i, exp(z_i) overflows 32-bit floats to inf (yielding NaN). The identity log(sum exp(z_i)) = c + log(sum exp(z_i - c)) with c = max(z) guarantees all exponents <= 0.'
+        },
+        {
+          id: 'ml_diff_9',
+          topic: 'Rotary Position Embedding',
+          difficulty: 'Difficult',
           question: 'What mathematical property of Rotary Position Embedding (RoPE) ensures relative position awareness in Multi-Head Attention?',
           options: {
             A: 'The inner product <R_m q, R_n k> depends strictly on the relative distance (m - n) via a complex rotation matrix.',
@@ -1026,50 +1381,24 @@
           explanation: 'RoPE applies an orthogonal block-diagonal rotation matrix R_m to queries and R_n to keys. In complex coordinates, <R_m q, R_n k> = Re[q* (R_{m-n} k)], so attention scores depend purely on relative offset (m - n).'
         },
         {
-          id: 'ml_q10',
-          topic: 'Quantization & Model Compression',
-          difficulty: 'Advanced',
-          question: 'In asymmetric uniform 8-bit integer quantization, how are real-valued tensor values x converted to quantized integers q in [0, 255]?',
+          id: 'ml_diff_10',
+          topic: 'Machine Learning Evaluation',
+          difficulty: 'Difficult',
+          question: 'In an extreme class-imbalanced binary classification setting (99.9% negative, 0.1% positive), why is PR-AUC preferred over ROC-AUC?',
           options: {
-            A: 'q = round(x * 128) + 127',
-            B: 'q = clamp(round(x / S) + Z, 0, 255) where S is scale and Z is integer zero-point.',
-            C: 'q = floor(log2(abs(x))) * sign(x)',
-            D: 'q = round(softmax(x) * 255)'
-          },
-          answer: 'B',
-          explanation: 'Asymmetric quantization maps [x_min, x_max] to [0, 255] using scale S = (x_max - x_min) / 255 and integer zero-point Z = round(-x_min / S), computed as q = clamp(round(x / S) + Z, 0, 255).'
-        },
-        {
-          id: 'ml_q11',
-          topic: 'Deep Learning Architectures',
-          difficulty: 'Advanced',
-          question: 'What is the theoretical justification for the residual connection x + F(x) in ResNets preventing vanishing gradients?',
-          options: {
-            A: 'It multiplies the gradient Jacobian by an orthogonal unitary factor at every layer.',
-            B: 'The gradient dE/dx = dE/dy * (I + dF/dx) includes an identity term I, ensuring a clean highway for gradient propagation regardless of dF/dx.',
-            C: 'It replaces non-convex loss surfaces with strictly quadratic bowls.',
-            D: 'It constrains all weight eigenvalues to lie strictly inside the complex unit circle.'
-          },
-          answer: 'B',
-          explanation: 'By the chain rule, dE/dx_l = dE/dx_L * (I + sum dF/dx), so gradients can flow directly from output layer L back to shallow layer l without vanishing exponentially through repeated matrix multiplications.'
-        },
-        {
-          id: 'ml_q12',
-          topic: 'Information Retrieval & RAG',
-          difficulty: 'Advanced',
-          question: 'In dense vector retrieval for RAG, why is Maximum Inner Product Search (MIPS) equivalent to nearest neighbor search under Euclidean distance when embeddings are L2-normalized?',
-          options: {
-            A: 'Because ||u - v||^2 = ||u||^2 + ||v||^2 - 2<u, v> = 2 - 2<u, v>, so maximizing <u, v> minimizes Euclidean distance.',
-            B: 'Because L2 normalization forces all vector dot products to zero.',
-            C: 'Because high-dimensional spheres possess zero intrinsic curvature.',
-            D: 'Because the cosine similarity matrix becomes strictly diagonally dominant.'
+            A: 'The True Negative Rate in the ROC denominator is dominated by huge negative counts, masking large numbers of false positives, whereas PR-AUC explicitly tracks Precision.',
+            B: 'ROC-AUC cannot be calculated if the true negative count is non-zero.',
+            C: 'PR-AUC is invariant to monotonic probability calibration scaling.',
+            D: 'ROC-AUC strictly penalizes precision drops more severely than recall drops.'
           },
           answer: 'A',
-          explanation: 'When ||u|| = ||v|| = 1, ||u - v||^2 = 2 - 2(u . v). Thus, maximizing the dot product u . v directly minimizes ||u - v||^2, making MIPS and L2 Euclidean nearest neighbors mathematically identical.'
+          explanation: 'In ROC, FPR = FP / (FP + TN). When TN is huge, FPR remains deceptively tiny even if FP is orders of magnitude larger than TP. PR-AUC focuses on Precision = TP / (TP + FP) and Recall.'
         },
+
+        // --- TIER 4: ADVANCED (~15% target) ---
         {
-          id: 'ml_q13',
-          topic: 'Mathematics of AI: Linear Algebra',
+          id: 'ml_adv_1',
+          topic: 'Linear Algebra: SVD',
           difficulty: 'Advanced',
           question: 'According to the Eckart-Young-Mirsky Theorem, what is the optimal rank-k approximation of a matrix A under the Frobenius norm?',
           options: {
@@ -1082,135 +1411,93 @@
           explanation: 'The Eckart-Young-Mirsky Theorem proves that the truncated SVD A_k = sum_{i=1}^k sigma_i u_i v_i^T minimizes ||A - B||_F over all matrices B of rank at most k.'
         },
         {
-          id: 'ml_q14',
-          topic: 'Deep Learning: Attention Mechanisms',
+          id: 'ml_adv_2',
+          topic: 'Information Theory: Entropy',
           difficulty: 'Advanced',
-          question: 'What distinguishes Grouped-Query Attention (GQA) from Multi-Head Attention (MHA) and Multi-Query Attention (MQA)?',
+          question: 'What continuous probability distribution uniquely maximizes differential entropy for a fixed mean and variance sigma^2 on (-inf, +inf)?',
           options: {
-            A: 'GQA groups tokens across temporal sequence windows rather than head dimensions.',
-            B: 'GQA divides H query heads into G groups, with all query heads in each group sharing a single Key and Value head, balancing speed and expressivity.',
-            C: 'GQA replaces dot-product attention with group convolution filters.',
-            D: 'GQA computes attention weights only between adjacent token clusters.'
-          },
-          answer: 'B',
-          explanation: 'MHA uses 1 KV head per Q head; MQA shares 1 single KV head across all Q heads. GQA interpolates between them: G query groups share KV heads, significantly reducing KV cache memory while maintaining MHA-like accuracy.'
-        },
-        {
-          id: 'ml_q15',
-          topic: 'Optimization & Numerical Stability',
-          difficulty: 'Research',
-          question: 'In deep network loss functions, why is Cross-Entropy formulated using log-sum-exp stabilization instead of naive computation of exp(z_i) / sum exp(z_j)?',
-          options: {
-            A: 'Subtracting max(z) before exp prevents numerical overflow (inf) while adding a log shift prevents underflow to 0.',
-            B: 'It reduces the asymptotic complexity of softmax from O(N) to O(log N).',
-            C: 'It forces logits to be strictly orthogonal to the ground-truth one-hot label.',
-            D: 'It removes negative eigenvalues from the loss Hessian matrix.'
-          },
-          answer: 'A',
-          explanation: 'For large logits z_i, exp(z_i) overflows 32-bit floats to inf (yielding NaN). The identity log(sum exp(z_i)) = c + log(sum exp(z_i - c)) with c = max(z) guarantees all exponents <= 0, preventing overflow.'
-        },
-        {
-          id: 'ml_q16',
-          topic: 'Machine Learning Evaluation',
-          difficulty: 'Advanced',
-          question: 'In an extreme class-imbalanced binary classification setting (99.9% negative, 0.1% positive), why is the Precision-Recall AUC (PR-AUC) preferred over ROC-AUC?',
-          options: {
-            A: 'ROC-AUC cannot be calculated if the true negative count is non-zero.',
-            B: 'The True Negative Rate (specificity) in the ROC denominator is dominated by huge negative counts, masking large numbers of false positives.',
-            C: 'PR-AUC is invariant to monotonic probability calibration scaling.',
-            D: 'ROC-AUC strictly penalizes precision drops more severely than recall drops.'
-          },
-          answer: 'B',
-          explanation: 'In ROC, False Positive Rate = FP / (FP + TN). When TN is huge, FPR remains deceptively tiny even if FP is orders of magnitude larger than TP. PR-AUC focuses on Precision = TP / (TP + FP) and Recall, explicitly exposing false positives.'
-        },
-        {
-          id: 'ml_q17',
-          topic: 'Generative AI: Diffusion Models',
-          difficulty: 'Research',
-          question: 'In Denoising Diffusion Probabilistic Models (DDPM), what is the primary purpose of the reparameterization trick during forward diffusion sampling at arbitrary timestep t?',
-          options: {
-            A: 'Sampling x_t in closed form directly from x_0 via x_t = sqrt(alpha_bar_t)*x_0 + sqrt(1 - alpha_bar_t)*epsilon without iterative Markov steps.',
-            B: 'Enforcing the noise schedule to strictly follow a deterministic Gaussian mixture.',
-            C: 'Preventing the score function from depending on spatial image gradients.',
-            D: 'Eliminating the variational lower bound computation during training.'
-          },
-          answer: 'A',
-          explanation: 'Due to the composition of Gaussian distributions, the forward marginal q(x_t | x_0) can be computed in closed form at any arbitrary timestep t without simulating the Markov chain step-by-step from 1 to t.'
-        },
-        {
-          id: 'ml_q18',
-          topic: 'Reinforcement Learning: Policy Gradients',
-          difficulty: 'Advanced',
-          question: 'In Proximal Policy Optimization (PPO), what is the role of the clipped surrogate objective L^{CLIP}(theta)?',
-          options: {
-            A: 'It prevents overly large policy updates by clipping probability ratios r_t(theta) outside [1 - epsilon, 1 + epsilon] when advantage is positive or negative.',
-            B: 'It clips state observation vectors to zero-mean unit variance.',
-            C: 'It guarantees that policy entropy is strictly non-decreasing over training epochs.',
-            D: 'It replaces Generalized Advantage Estimation with tabular Q-learning.'
-          },
-          answer: 'A',
-          explanation: 'PPO clips the probability ratio r_t(theta) = pi_theta(a|s) / pi_old(a|s) to [1-eps, 1+eps], taking the minimum with the unclipped objective to penalize destructive policy updates while retaining first-order optimization efficiency.'
-        },
-        {
-          id: 'ml_q19',
-          topic: 'Deep Learning: Weight Initialization',
-          difficulty: 'Advanced',
-          question: 'Why does Kaiming (He) initialization use Var(W) = 2 / n_in instead of Xavier (Glorot) initialization Var(W) = 2 / (n_in + n_out) for networks with ReLU activations?',
-          options: {
-            A: 'Because ReLU sets roughly half the activations to zero, halving the variance at each forward layer.',
-            B: 'Because ReLU causes activations to double in magnitude at every linear projection.',
-            C: 'Because Xavier initialization is strictly invalid for complex-valued weights.',
-            D: 'Because Kaiming initialization regularizes the spectral norm to 0.5.'
-          },
-          answer: 'A',
-          explanation: 'Because ReLU(x) = max(0, x) outputs zero for negative inputs, under symmetric zero-mean assumptions roughly half the units are inactive, effectively halving variance. Multiplying variance by 2 restores activation variance across layers.'
-        },
-        {
-          id: 'ml_q20',
-          topic: 'Distributed Training & Systems',
-          difficulty: 'Advanced Systems',
-          question: 'In Zero Redundancy Optimizer Stage 3 (ZeRO-3), how are model states partitioned across data-parallel ranks to fit 100B+ parameter models?',
-          options: {
-            A: 'Only optimizer states are partitioned; gradients and parameters are replicated.',
-            B: 'Optimizer states, gradients, and model parameters are all partitioned across ranks and gathered via all-gather right before forward/backward execution.',
-            C: 'Weights are offloaded strictly to CPU RAM via PCIe and never stored in GPU VRAM.',
-            D: 'Layers are split across distinct pipeline stages with 1F1B schedule.'
-          },
-          answer: 'B',
-          explanation: 'ZeRO Stage 1 partitions optimizer states; Stage 2 partitions gradients; Stage 3 partitions all model parameters across data-parallel ranks, dynamically fetching weights via all-gather and discarding them immediately after each layer computation.'
-        },
-        {
-          id: 'ml_q21',
-          topic: 'Information Theory & Entropy',
-          difficulty: 'Research',
-          question: 'What distribution maximizes differential entropy over continuous random variables supported on (-inf, +inf) for a fixed mean and variance sigma^2?',
-          options: {
-            A: 'Uniform distribution on [-sqrt(3)*sigma, sqrt(3)*sigma]',
-            B: 'Gaussian (Normal) distribution N(mu, sigma^2)',
+            A: 'Gaussian (Normal) distribution N(mu, sigma^2)',
+            B: 'Uniform distribution on [-sqrt(3)*sigma, sqrt(3)*sigma]',
             C: 'Laplace distribution with scale b = sigma / sqrt(2)',
             D: 'Cauchy distribution with scale gamma = sigma'
           },
-          answer: 'B',
-          explanation: 'By the maximum entropy principle using Lagrange multipliers with constraints on normalization and second moment, the Gaussian distribution uniquely maximizes differential entropy over the entire real line.'
+          answer: 'A',
+          explanation: 'By the maximum entropy principle using Lagrange multipliers with constraints on normalization and second moment, the Gaussian distribution uniquely maximizes differential entropy.'
         },
         {
-          id: 'ml_q22',
-          topic: 'Self-Supervised Learning',
+          id: 'ml_adv_3',
+          topic: 'Information Theory: KL Divergence',
           difficulty: 'Advanced',
-          question: 'In Masked Autoencoders (MAE), why can the ViT encoder process only a small fraction (e.g. 25%) of visible image patches, while standard BERT must process 100% of tokens?',
+          question: 'For two continuous probability distributions P and Q, what does Kullback-Leibler divergence D_KL(P || Q) quantify, and what is its symmetry property?',
           options: {
-            A: 'MAE completely deletes masked patch tokens before feeding them to the encoder, processing only unmasked tokens to save compute.',
-            B: 'Images have lower spatial dimensionality than natural language tokens.',
-            C: 'MAE uses 2D spatial convolution instead of self-attention.',
-            D: 'Visible patches are merged using pixel average pooling.'
+            A: 'It quantifies relative entropy (information loss) when using Q to approximate P; it is non-negative and generally asymmetric.',
+            B: 'It is a symmetric Euclidean metric quantifying the geometric distance between covariance matrices.',
+            C: 'It measures total variation bounded between -1 and +1, satisfying the triangle inequality.',
+            D: 'It computes the cosine angle between probability density gradient vectors on a Riemannian manifold.'
           },
           answer: 'A',
-          explanation: 'MAE discards masked patches completely during the heavy encoder pass, executing self-attention only on the 25% visible patches. Mask tokens are only introduced in the lightweight decoder, yielding ~4x compute savings.'
+          explanation: 'KL divergence D_KL(P || Q) = int P(x) log(P(x)/Q(x)) dx measures expected information loss. By Gibbs inequality, D_KL(P || Q) >= 0, with equality iff P = Q; in general D_KL(P || Q) != D_KL(Q || P).'
         },
         {
-          id: 'ml_q23',
-          topic: 'Mathematics: Optimization',
-          difficulty: 'Advanced Mathematical',
+          id: 'ml_adv_4',
+          topic: 'Distributed Systems: ZeRO-3',
+          difficulty: 'Advanced',
+          question: 'In Zero Redundancy Optimizer Stage 3 (ZeRO-3), how are model states partitioned across data-parallel ranks to fit 100B+ parameter models?',
+          options: {
+            A: 'Optimizer states, gradients, and model parameters are all partitioned across ranks and gathered via all-gather dynamically right before layer execution.',
+            B: 'Only optimizer states are partitioned; gradients and parameters are replicated.',
+            C: 'Weights are offloaded strictly to CPU RAM via PCIe and never stored in GPU VRAM.',
+            D: 'Layers are split across distinct pipeline stages with 1F1B schedule.'
+          },
+          answer: 'A',
+          explanation: 'ZeRO Stage 1 partitions optimizer states; Stage 2 partitions gradients; Stage 3 partitions all model parameters across data-parallel ranks, dynamically fetching weights via all-gather and discarding them immediately after each layer.'
+        },
+        {
+          id: 'ml_adv_5',
+          topic: 'Parameter-Efficient Fine-Tuning',
+          difficulty: 'Advanced',
+          question: 'In Low-Rank Adaptation (LoRA), how are adapter weight matrices A in R^{r x d_in} and B in R^{d_out x r} typically initialized before fine-tuning?',
+          options: {
+            A: 'A is initialized with Gaussian noise and B is initialized to zero, so Delta W = B*A = 0 at step 0.',
+            B: 'Both A and B are initialized to identity matrices I_r.',
+            C: 'Both A and B are initialized with zero vectors.',
+            D: 'A is initialized to zero and B is initialized with Xavier uniform noise.'
+          },
+          answer: 'A',
+          explanation: 'Setting B = 0 and A ~ N(0, sigma^2) ensures that the perturbation Delta W = B * A is strictly zero at the beginning of training, preserving the pre-trained model outputs.'
+        },
+        {
+          id: 'ml_adv_6',
+          topic: 'Quantization',
+          difficulty: 'Advanced',
+          question: 'In asymmetric uniform 8-bit integer quantization, how are real-valued tensor values x converted to quantized integers q in [0, 255]?',
+          options: {
+            A: 'q = clamp(round(x / S) + Z, 0, 255) where S is scale and Z is integer zero-point.',
+            B: 'q = round(x * 128) + 127',
+            C: 'q = floor(log2(abs(x))) * sign(x)',
+            D: 'q = round(softmax(x) * 255)'
+          },
+          answer: 'A',
+          explanation: 'Asymmetric quantization maps [x_min, x_max] to [0, 255] using scale S = (x_max - x_min) / 255 and integer zero-point Z = round(-x_min / S), computed as q = clamp(round(x / S) + Z, 0, 255).'
+        },
+        {
+          id: 'ml_adv_7',
+          topic: 'Reinforcement Learning: DPO',
+          difficulty: 'Advanced',
+          question: 'In Direct Preference Optimization (DPO), how is the policy objective derived from traditional RLHF with a Bradley-Terry reward model?',
+          options: {
+            A: 'By expressing the ground-truth reward analytically as implicit log-ratio r(x,y) = beta * log(pi_theta(y|x) / pi_ref(y|x)), substituting directly into the loss.',
+            B: 'By training an explicit neural reward model and taking Monte Carlo policy rollouts.',
+            C: 'By replacing cross-entropy loss with mean squared error over preferred token logits.',
+            D: 'By optimizing actor-critic networks using Generalized Advantage Estimation over human ranking scores.'
+          },
+          answer: 'A',
+          explanation: 'DPO uses the closed-form relationship between optimal policy and reward in Bradley-Terry models, substituting r(x,y) = beta * log(pi / pi_ref) directly into the objective, bypassing explicit reward modeling.'
+        },
+        {
+          id: 'ml_adv_8',
+          topic: 'Optimization Bounds',
+          difficulty: 'Advanced',
           question: 'Under what condition does gradient descent with step size eta converge for a beta-smooth convex function f(x)?',
           options: {
             A: '0 < eta < 2 / beta',
@@ -1219,21 +1506,7 @@
             D: 'eta < 1 / (2 * beta^2)'
           },
           answer: 'A',
-          explanation: 'For a beta-smooth convex function (Lipschitz continuous gradient with constant beta), standard descent lemma proves that gradient descent is guaranteed to monotonically decrease the objective whenever 0 < eta < 2 / beta.'
-        },
-        {
-          id: 'ml_q24',
-          topic: 'Model Distillation',
-          difficulty: 'Advanced',
-          question: 'In Hinton-style knowledge distillation, what is the role of temperature T in the teacher and student softened softmax distributions?',
-          options: {
-            A: 'Higher T softens probabilities, revealing rich "dark knowledge" (relative similarities across negative non-target classes).',
-            B: 'Higher T drives the output toward a discrete one-hot vector.',
-            C: 'Lower T prevents the student gradients from overflowing.',
-            D: 'T scales the learning rate exponentially with model depth.'
-          },
-          answer: 'A',
-          explanation: 'At T=1, probabilities of incorrect classes are nearly zero. Elevating T softens the distribution, revealing the rich structural similarities between classes that the teacher model discovered.'
+          explanation: 'For a beta-smooth convex function (Lipschitz continuous gradient with constant beta), the standard descent lemma proves that gradient descent monotonically decreases the objective whenever 0 < eta < 2 / beta.'
         }
       ];
 
@@ -1248,21 +1521,21 @@
           const r = ranks[(seed >> 2) % ranks.length];
           const L = layers[(seed >> 4) % layers.length];
           const correctParams = 2 * L * (2 * d * r);
-          const distractor1 = L * (2 * d * r);
-          const distractor2 = 2 * L * (d * d);
-          const distractor3 = 2 * L * (d * r);
+          const d1 = L * (2 * d * r);
+          const d2 = 2 * L * (d * d);
+          const d3 = 2 * L * (d * r);
 
           const qId = `proc_lora_${d}_${r}_${L}`;
           return {
             id: qId,
             topic: 'Parameter-Efficient Fine-Tuning',
-            difficulty: 'Advanced Numerical',
+            difficulty: 'Difficult',
             question: `A transformer model has hidden dimension d = ${d} and L = ${L} layers. You apply LoRA with rank r = ${r} exclusively to Query and Value projection matrices. What is the total count of trainable LoRA parameters?`,
             options: {
               A: `${correctParams.toLocaleString()} parameters`,
-              B: `${distractor1.toLocaleString()} parameters`,
-              C: `${distractor2.toLocaleString()} parameters`,
-              D: `${distractor3.toLocaleString()} parameters`
+              B: `${d1.toLocaleString()} parameters`,
+              C: `${d2.toLocaleString()} parameters`,
+              D: `${d3.toLocaleString()} parameters`
             },
             answer: 'A',
             explanation: `For each of the ${L} layers, Q and V each require adapter matrices A (d x r) and B (r x d) totaling 2 * ${d} * ${r} = ${2 * d * r} params. For 2 matrices across ${L} layers: 2 * ${L} * (2 * ${d} * ${r}) = ${correctParams.toLocaleString()} parameters.`
@@ -1288,7 +1561,7 @@
           return {
             id: qId,
             topic: 'LLM Systems & Inference',
-            difficulty: 'Advanced Systems',
+            difficulty: 'Advanced',
             question: `For a transformer with hidden size d = ${d}, L = ${L} layers in FP16 (2 bytes/elem), what is the exact KV cache memory allocated for a batch size B = ${b} and context length S = ${s}?`,
             options: {
               A: `~${mbTotal} MB`,
@@ -1317,7 +1590,7 @@
           return {
             id: qId,
             topic: 'Transformer Complexity',
-            difficulty: 'Advanced Mathematical',
+            difficulty: 'Difficult',
             question: `In standard Multi-Head Attention with sequence length N = ${N}, H = ${h} heads, and d_k = ${dk}, how many floating point operations (FLOPs, 2 ops per MAC) are required to compute QK^T?`,
             options: {
               A: `~${flopsG} GFLOPs`,
@@ -1326,7 +1599,7 @@
               D: `~${flopsD3} GFLOPs`
             },
             answer: 'A',
-            explanation: `QK^T computes H * N^2 dot products of dimension d_k. At 2 FLOPs per multiply-accumulate: 2 * ${h} * (${N}^2) * ${dk} = ${(2 * h * N * N * dk).toExponential(2)} FLOPs = ~${flopsG} GFLOPs.`
+            explanation: `QK^T computes H * N^2 dot products of dimension d_k. At 2 FLOPs per multiply-accumulate: 2 * ${h} * (${N}^2) * ${dk} = ~${flopsG} GFLOPs.`
           };
         },
 
@@ -1346,7 +1619,7 @@
           return {
             id: qId,
             topic: 'Convolutional Architectures',
-            difficulty: 'Advanced Deep Learning',
+            difficulty: 'Difficult',
             question: `A CNN has ${d} stacked convolutional layers, each with kernel size K = ${k} and stride S = 2. What is the effective 1D receptive field of a neuron in the final layer?`,
             options: {
               A: `${rf} pixels`,
@@ -1373,7 +1646,7 @@
           return {
             id: qId,
             topic: 'Distributed Training Systems',
-            difficulty: 'Engineering Systems',
+            difficulty: 'Advanced',
             question: `In distributed training across ${g} GPUs, each worker uses a micro-batch size of ${m} and accumulates gradients for ${a} forward/backward steps before an optimizer step. What is the effective global batch size?`,
             options: {
               A: `${effective} samples`,
@@ -1436,6 +1709,25 @@
       }
 
       static getNextQuestion(usedIds = []) {
+        // Target distribution: Easy ~20%, Medium ~35%, Difficult ~30%, Advanced ~15%
+        const roll = Math.random();
+        let targetTier = 'Medium';
+        if (roll < 0.20) {
+          targetTier = 'Easy';
+        } else if (roll < 0.55) {
+          targetTier = 'Medium';
+        } else if (roll < 0.85) {
+          targetTier = 'Difficult';
+        } else {
+          targetTier = 'Advanced';
+        }
+
+        const tierMatches = this.CURATED_QUESTIONS.filter(q => q.difficulty === targetTier && !usedIds.includes(q.id));
+        if (tierMatches.length > 0) {
+          const selected = tierMatches[Math.floor(Math.random() * tierMatches.length)];
+          return this.shuffleOptions(selected);
+        }
+
         const unused = this.CURATED_QUESTIONS.filter(q => !usedIds.includes(q.id));
         if (unused.length > 0) {
           const selected = unused[Math.floor(Math.random() * unused.length)];
@@ -1459,33 +1751,36 @@
       }
 
       static simulateAIAnswer(question, difficulty) {
-        let accuracy = 0.40;
+        let accuracy = 0.55;
         let minDelay = 4500;
-        let maxDelay = 8500;
+        let maxDelay = 9500;
 
         switch (difficulty) {
           case 'easy':
             accuracy = 0.35;
-            minDelay = 5000;
-            maxDelay = 9000;
+            minDelay = 7000;
+            maxDelay = 14000;
             break;
           case 'medium':
             accuracy = 0.60;
-            minDelay = 3500;
-            maxDelay = 6500;
+            minDelay = 5000;
+            maxDelay = 10000;
             break;
           case 'hard':
             accuracy = 0.82;
-            minDelay = 2200;
-            maxDelay = 4500;
+            minDelay = 3500;
+            maxDelay = 7000;
             break;
           case 'impossible':
           default:
             accuracy = 0.94;
-            minDelay = 1600;
-            maxDelay = 3200;
+            minDelay = 2200;
+            maxDelay = 5000;
             break;
         }
+
+        if (question && question.difficulty === 'Easy') accuracy = Math.min(0.98, accuracy + 0.15);
+        else if (question && question.difficulty === 'Advanced') accuracy = Math.max(0.20, accuracy - 0.10);
 
         const isCorrect = Math.random() < accuracy;
         let chosenOption;
@@ -1502,19 +1797,162 @@
       }
     }
 
+    // ==============================================================================
+    // REAL AUTHENTICATION & SECURE CLIENT STORAGE SERVICE
+    // ==============================================================================
+    class AuthService {
+      static ACCOUNTS_KEY = 'zero_kaata_accounts_v1';
+      static SESSION_KEY = 'zero_kaata_session_v1';
+
+      static async hashPassword(username, password) {
+        const input = `${username.trim().toLowerCase()}_salt_btg_${password}`;
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle && window.crypto.subtle.digest) {
+          try {
+            const enc = new TextEncoder();
+            const data = enc.encode(input);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          } catch (e) {}
+        }
+        // Safe fast hash fallback for non-crypto/file:// origins
+        let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+        for (let i = 0; i < input.length; i++) {
+          const ch = input.charCodeAt(i);
+          h1 = Math.imul(h1 ^ ch, 2654435761);
+          h2 = Math.imul(h2 ^ ch, 1597334677);
+        }
+        h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+        return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(16, '0');
+      }
+
+      static getAccounts() {
+        try {
+          return JSON.parse(localStorage.getItem(this.ACCOUNTS_KEY) || '{}');
+        } catch {
+          return {};
+        }
+      }
+
+      static saveAccounts(accounts) {
+        try {
+          localStorage.setItem(this.ACCOUNTS_KEY, JSON.stringify(accounts));
+        } catch {}
+      }
+
+      static getCurrentUser() {
+        try {
+          const raw = localStorage.getItem(this.SESSION_KEY);
+          if (raw) {
+            const user = JSON.parse(raw);
+            if (user && user.id && user.id !== 'guest') {
+              const accounts = this.getAccounts();
+              const key = (user.username || '').toLowerCase();
+              if (accounts[key] && accounts[key].id === user.id) {
+                return { id: user.id, username: accounts[key].username, isGuest: false };
+              }
+            }
+          }
+        } catch {}
+        return { id: 'guest', username: 'Guest', isGuest: true };
+      }
+
+      static setCurrentUser(user) {
+        try {
+          localStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
+        } catch {}
+      }
+
+      static async register(username, password) {
+        const cleanUser = username.trim();
+        if (cleanUser.length < 3 || cleanUser.length > 20) {
+          throw new Error('Username must be between 3 and 20 characters.');
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(cleanUser)) {
+          throw new Error('Username can only contain letters, numbers, and underscores.');
+        }
+        if (!password || password.length < 4) {
+          throw new Error('Password must be at least 4 characters long.');
+        }
+
+        const accounts = this.getAccounts();
+        const key = cleanUser.toLowerCase();
+        if (accounts[key]) {
+          throw new Error(`Username "${cleanUser}" is already taken.`);
+        }
+
+        const passwordHash = await this.hashPassword(cleanUser, password);
+        const userId = 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+        accounts[key] = {
+          id: userId,
+          username: cleanUser,
+          passwordHash,
+          createdAt: Date.now()
+        };
+        this.saveAccounts(accounts);
+
+        const user = { id: userId, username: cleanUser, isGuest: false };
+        this.setCurrentUser(user);
+        return user;
+      }
+
+      static async login(username, password) {
+        const cleanUser = username.trim();
+        const accounts = this.getAccounts();
+        const key = cleanUser.toLowerCase();
+        const account = accounts[key];
+        if (!account) {
+          throw new Error('Invalid username or password.');
+        }
+
+        const hash = await this.hashPassword(cleanUser, password);
+        if (hash !== account.passwordHash) {
+          throw new Error('Invalid username or password.');
+        }
+
+        const user = { id: account.id, username: account.username, isGuest: false };
+        this.setCurrentUser(user);
+        return user;
+      }
+
+      static logout() {
+        const guestUser = { id: 'guest', username: 'Guest', isGuest: true };
+        this.setCurrentUser(guestUser);
+        return guestUser;
+      }
+
+      static getUserStorageKey(userId) {
+        return `zero_kaata_user_${userId}`;
+      }
+    }
+
     function App() {
       const [view, setView] = useState('home'); // home | play | modes | online_lobby | history | puzzles | settings | audit
       const [theme, setTheme] = useState('midnight_neon');
       const [view3D, setView3D] = useState(true); // 3D Perspective Toggle
 
-      // Overall User Progression & Statistics
+      // Authentication State
+      const [currentUser, setCurrentUser] = useState(() => AuthService.getCurrentUser());
+      const [showAuthModal, setShowAuthModal] = useState(false);
+      const [authTab, setAuthTab] = useState('login'); // 'login' | 'register'
+      const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
+      const [authError, setAuthError] = useState('');
+
+      // Overall User Progression & Statistics — STRICT CLEAN ZERO DEFAULTS (NO FABRICATED DATA)
       const [stats, setStats] = useState({
-        matches: 1250, wins: 850, losses: 320, draws: 80, streak: 18, bestStreak: 24, xp: 720, level: 12
+        matches: 0, wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0, xp: 0, level: 1, questionsAnswered: 0, questionsCorrect: 0
       });
       const [matchHistory, setMatchHistory] = useState([]);
       const [toasts, setToasts] = useState([]);
       const [showProfileModal, setShowProfileModal] = useState(false);
       const [profileTab, setProfileTab] = useState('stats'); // stats | achievements | history
+
+      // Game Mode Selection Modal State
+      const [activeBattleMode, setActiveBattleMode] = useState('knowledge_battle'); // 'normal' | 'knowledge_battle'
+      const [selectedBattleMode, setSelectedBattleMode] = useState('knowledge_battle');
+      const [showModeSelectModal, setShowModeSelectModal] = useState(false);
+      const [pendingMatchConfig, setPendingMatchConfig] = useState(null); // { mode, size, diff }
 
       // The 3 Core Game Modes: 'friend' (Pass & Play) | 'ai' (Vs Computer) | 'online' (Invite Online Player)
       const [gameMode, setGameMode] = useState('ai');
@@ -1529,7 +1967,7 @@
       const [moveHistory, setMoveHistory] = useState([]);
 
       // Match Timer State (State-Driven seconds)
-      const [matchElapsedSeconds, setMatchElapsedSeconds] = useState(45);
+      const [matchElapsedSeconds, setMatchElapsedSeconds] = useState(0);
 
       // Mode 1: Friend (Pass & Play) State
       const [player1Name, setPlayer1Name] = useState('Player 1');
@@ -1562,7 +2000,7 @@
       // AI/ML Knowledge Battle State
       const [currentQuestion, setCurrentQuestion] = useState(null);
       const [questionDeadline, setQuestionDeadline] = useState(null);
-      const [questionRemainingMs, setQuestionRemainingMs] = useState(10000);
+      const [questionRemainingMs, setQuestionRemainingMs] = useState(AIMLQuestionEngine.QUESTION_DURATION_MS);
       const [questionStatus, setQuestionStatus] = useState('idle'); // idle | active | resolved | expired
       const [p1Answer, setP1Answer] = useState(null); // { option, isCorrect, timestamp }
       const [p2Answer, setP2Answer] = useState(null); // { option, isCorrect, timestamp }
@@ -1576,6 +2014,19 @@
       const aiTimerRef = useRef(null);
       const nextQuestionTimeoutRef = useRef(null);
 
+      // STALE CLOSURE FIX: Ref synchronization for async callbacks
+      const questionStatusRef = useRef('idle');
+      const currentQuestionRef = useRef(null);
+      const questionDeadlineRef = useRef(null);
+      const movePermissionRef = useRef(null);
+      const activeBattleModeRef = useRef('knowledge_battle');
+
+      useEffect(() => { questionStatusRef.current = questionStatus; }, [questionStatus]);
+      useEffect(() => { currentQuestionRef.current = currentQuestion; }, [currentQuestion]);
+      useEffect(() => { questionDeadlineRef.current = questionDeadline; }, [questionDeadline]);
+      useEffect(() => { movePermissionRef.current = movePermission; }, [movePermission]);
+      useEffect(() => { activeBattleModeRef.current = activeBattleMode; }, [activeBattleMode]);
+
       const clearQuestionTimers = () => {
         if (aiTimerRef.current) {
           clearTimeout(aiTimerRef.current);
@@ -1587,10 +2038,10 @@
         }
       };
 
-      // 10-Second High-Precision Question Countdown Timer
+      // 20-Second High-Precision Question Countdown Timer
       useEffect(() => {
         let interval = null;
-        if (view === 'play' && gameStatus === 'playing' && questionStatus === 'active' && questionDeadline) {
+        if (view === 'play' && gameStatus === 'playing' && questionStatus === 'active' && questionDeadline && activeBattleMode === 'knowledge_battle') {
           interval = setInterval(() => {
             const now = Date.now();
             const remaining = Math.max(0, questionDeadline - now);
@@ -1604,7 +2055,7 @@
         return () => {
           if (interval) clearInterval(interval);
         };
-      }, [view, gameStatus, questionStatus, questionDeadline]);
+      }, [view, gameStatus, questionStatus, questionDeadline, activeBattleMode]);
 
       // Tactical Puzzle State
       const [activePuzzle, setActivePuzzle] = useState(TACTICAL_PUZZLES[0]);
@@ -1626,22 +2077,52 @@
         return () => clearInterval(interval);
       }, [view, gameStatus]);
 
-      // Load Saved Local Data on Mount
-      useEffect(() => {
+      // User Data Loading & Persistence Functions
+      const loadUserData = (user) => {
         try {
-          const raw = localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2');
+          const storageKey = AuthService.getUserStorageKey(user.id);
+          const raw = localStorage.getItem(storageKey);
           if (raw) {
             const data = JSON.parse(raw);
             if (data.stats) setStats(data.stats);
+            else setStats({ matches: 0, wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0, xp: 0, level: 1, questionsAnswered: 0, questionsCorrect: 0 });
             if (data.matchHistory) setMatchHistory(data.matchHistory);
+            else setMatchHistory([]);
+            if (data.usedQuestionIds) setUsedQuestionIds(data.usedQuestionIds);
+            else setUsedQuestionIds([]);
             if (data.theme) {
               setTheme(data.theme);
               document.documentElement.setAttribute('data-theme', data.theme);
             }
             if (data.view3D !== undefined) setView3D(data.view3D);
-            if (data.usedQuestionIds) setUsedQuestionIds(data.usedQuestionIds);
+            return;
           }
         } catch {}
+
+        // Clean initial state for new user or guest
+        setStats({ matches: 0, wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0, xp: 0, level: 1, questionsAnswered: 0, questionsCorrect: 0 });
+        setMatchHistory([]);
+        setUsedQuestionIds([]);
+      };
+
+      const saveUserData = (user, updatedStats, updatedHistory, updatedUsedQuestions) => {
+        try {
+          const storageKey = AuthService.getUserStorageKey(user.id);
+          localStorage.setItem(storageKey, JSON.stringify({
+            stats: updatedStats || stats,
+            matchHistory: updatedHistory || matchHistory,
+            usedQuestionIds: (updatedUsedQuestions || usedQuestionIds).slice(-100),
+            theme,
+            view3D
+          }));
+        } catch {}
+      };
+
+      // Load User Data on Mount
+      useEffect(() => {
+        const user = AuthService.getCurrentUser();
+        setCurrentUser(user);
+        loadUserData(user);
 
         // Check if arrived via invite URL (?room=BTG-XXXX)
         const params = new URLSearchParams(window.location.search);
@@ -1663,20 +2144,14 @@
       const changeTheme = (newTheme) => {
         setTheme(newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
-        try {
-          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
-          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, theme: newTheme }));
-        } catch {}
+        saveUserData(currentUser);
         SoundManager.playClick();
       };
 
       const toggle3DView = () => {
         const next = !view3D;
         setView3D(next);
-        try {
-          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
-          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, view3D: next }));
-        } catch {}
+        saveUserData(currentUser);
         SoundManager.playClick();
         showToast('Camera Perspective', next ? '🎲 3D Perspective Tilt Activated' : '📐 2D Top-Down View Activated');
       };
@@ -1695,6 +2170,172 @@
       };
 
       // -------------------------------------------------------------
+      // AUTHENTICATION HANDLERS
+      // -------------------------------------------------------------
+      const handleAuthLogin = async (e) => {
+        if (e) e.preventDefault();
+        setAuthError('');
+        try {
+          const user = await AuthService.login(authForm.username, authForm.password);
+          setCurrentUser(user);
+          loadUserData(user);
+          setPlayer1Name(user.username);
+          setShowAuthModal(false);
+          setAuthForm({ username: '', password: '', confirmPassword: '' });
+          SoundManager.playWin();
+          showToast('Welcome Back!', `Logged in successfully as ${user.username}.`);
+        } catch (err) {
+          setAuthError(err.message || 'Login failed.');
+          SoundManager.playError();
+        }
+      };
+
+      const handleAuthRegister = async (e) => {
+        if (e) e.preventDefault();
+        setAuthError('');
+        if (authForm.password !== authForm.confirmPassword) {
+          setAuthError('Passwords do not match.');
+          SoundManager.playError();
+          return;
+        }
+        try {
+          const user = await AuthService.register(authForm.username, authForm.password);
+          setCurrentUser(user);
+          loadUserData(user);
+          setPlayer1Name(user.username);
+          setShowAuthModal(false);
+          setAuthForm({ username: '', password: '', confirmPassword: '' });
+          SoundManager.playWin();
+          showToast('Account Created!', `Welcome to Beyond the Grid, ${user.username}!`);
+        } catch (err) {
+          setAuthError(err.message || 'Registration failed.');
+          SoundManager.playError();
+        }
+      };
+
+      const handleAuthLogout = () => {
+        const guest = AuthService.logout();
+        setCurrentUser(guest);
+        loadUserData(guest);
+        setPlayer1Name('Player 1');
+        setShowAuthModal(false);
+        setShowProfileModal(false);
+        SoundManager.playClick();
+        showToast('Logged Out', 'Switched to Guest profile with clean local state.');
+      };
+
+      // -------------------------------------------------------------
+      // MATCH SETUP & START MATCH (ISSUES 2, 3, 4, 5 RESOLUTION)
+      // -------------------------------------------------------------
+      const [showMatchSetupModal, setShowMatchSetupModal] = useState(false);
+      const [matchSetupConfig, setMatchSetupConfig] = useState({
+        mode: 'friend',
+        size: 3,
+        diff: 'impossible',
+        protocol: 'knowledge_battle',
+        p1Name: 'Player 1',
+        p2Name: 'Player 2'
+      });
+
+      const openMatchSetup = (mode = 'friend', size = 3, diff = aiDiff) => {
+        setMatchSetupConfig({
+          mode,
+          size: size || 3,
+          diff: diff || aiDiff,
+          protocol: selectedBattleMode || 'knowledge_battle',
+          p1Name: currentUser.isGuest ? (player1Name || 'Player 1') : currentUser.username,
+          p2Name: player2Name || (mode === 'friend' ? 'Player 2' : 'Aether AI')
+        });
+        setShowMatchSetupModal(true);
+        SoundManager.playClick();
+      };
+
+      const launchConfiguredMatch = () => {
+        setShowMatchSetupModal(false);
+        setShowModeSelectModal(false);
+        if (matchSetupConfig.mode === 'friend') {
+          if (matchSetupConfig.p1Name && matchSetupConfig.p1Name.trim()) setPlayer1Name(matchSetupConfig.p1Name.trim());
+          if (matchSetupConfig.p2Name && matchSetupConfig.p2Name.trim()) setPlayer2Name(matchSetupConfig.p2Name.trim());
+        } else if (matchSetupConfig.mode === 'ai') {
+          setAiDiff(matchSetupConfig.diff);
+        }
+        setSelectedBattleMode(matchSetupConfig.protocol);
+        startMatch(matchSetupConfig.mode, matchSetupConfig.size, matchSetupConfig.diff, matchSetupConfig.protocol);
+      };
+
+      const promptGameModeSelection = (mode = gameMode, size = 3, diff = aiDiff) => {
+        openMatchSetup(mode, size, diff);
+      };
+
+      const confirmStartMatch = (chosenBattleMode) => {
+        setShowModeSelectModal(false);
+        setShowMatchSetupModal(false);
+        const cfg = pendingMatchConfig || { mode: 'ai', size: 3, diff: aiDiff };
+        startMatch(cfg.mode, cfg.size, cfg.diff, chosenBattleMode);
+      };
+
+      const startMatch = (mode = gameMode, size = 3, diff = aiDiff, battleProtocol = selectedBattleMode) => {
+        let targetMode = mode;
+        if (targetMode === 'online' && onlineStatus !== 'connected') {
+          targetMode = 'ai';
+        }
+
+        clearQuestionTimers();
+        setActiveBattleMode(battleProtocol);
+        activeBattleModeRef.current = battleProtocol;
+        setGameMode(targetMode);
+        setBoardSize(size);
+        setAiDiff(diff);
+        setBoard(Array(size * size).fill(null));
+        setMoveHistory([]);
+        setTurn('X');
+        setGameStatus('playing');
+        setWinner(null);
+        setWinningLine(null);
+        setShields([]);
+        setActivePowerUp(null);
+        setHintSquare(null);
+        setHintText('');
+        setRematchStatus(null);
+        setMatchElapsedSeconds(0);
+        setIsAiThinking(false);
+        setMovePermission(null);
+        movePermissionRef.current = null;
+        setInventory({ undo: 2, eraser: 2, shield: 2, hint: 3 });
+
+        if (targetMode === 'friend') {
+          setPlayerSym('X');
+          setOppSym('O');
+        } else if (targetMode === 'ai') {
+          setPlayerSym('X');
+          setOppSym('O');
+        } else if (targetMode === 'online') {
+          setPlayerSym(onlineRole === 'host' ? 'X' : 'O');
+          setOppSym(onlineRole === 'host' ? 'O' : 'X');
+        }
+
+        setView('play');
+        SoundManager.playClick();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (battleProtocol === 'knowledge_battle') {
+          if (targetMode !== 'online' || onlineRole === 'host') {
+            setTimeout(() => {
+              spawnQuestion([]);
+            }, 350);
+          }
+        } else {
+          // Normal Mode: Traditional Tic-Tac-Toe
+          clearQuestionTimers();
+          setCurrentQuestion(null);
+          currentQuestionRef.current = null;
+          setQuestionStatus('idle');
+          questionStatusRef.current = 'idle';
+          showToast('Normal Tic-Tac-Toe', 'Standard match started! Alternating turns on the grid.');
+        }
+      };
+
+      // -------------------------------------------------------------
       // AI/ML KNOWLEDGE BATTLE ENGINE METHODS
       // -------------------------------------------------------------
       const spawnQuestion = (customUsedIds = null) => {
@@ -1703,16 +2344,20 @@
         const q = AIMLQuestionEngine.getNextQuestion(activeUsed);
         const nextUsed = [...activeUsed, q.id];
         setUsedQuestionIds(nextUsed);
+        saveUserData(currentUser, null, null, nextUsed);
 
-        try {
-          const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || '{}');
-          localStorage.setItem('zero_kaata_save_v1', JSON.stringify({ ...current, usedQuestionIds: nextUsed.slice(-100) }));
-        } catch {}
+        const durationMs = AIMLQuestionEngine.QUESTION_DURATION_MS; // 20000ms
+        const deadline = Date.now() + durationMs;
 
-        const deadline = Date.now() + 10000;
+        // Synchronously update refs FIRST
+        questionStatusRef.current = 'active';
+        currentQuestionRef.current = q;
+        questionDeadlineRef.current = deadline;
+        movePermissionRef.current = null;
+
         setCurrentQuestion(q);
         setQuestionDeadline(deadline);
-        setQuestionRemainingMs(10000);
+        setQuestionRemainingMs(durationMs);
         setQuestionStatus('active');
         setP1Answer(null);
         setP2Answer(null);
@@ -1749,18 +2394,20 @@
       };
 
       const handleQuestionExpired = () => {
+        questionStatusRef.current = 'expired';
         setQuestionStatus('expired');
         setExplanationVisible(true);
+        movePermissionRef.current = null;
         setMovePermission(null);
         SoundManager.playError();
-        showToast("Time's Up!", "10 seconds elapsed. No player earned a move. Next question loading...");
+        showToast("Time's Up!", "20 seconds elapsed. No player earned a move. Next question loading...");
 
-        if (gameMode === 'online' && onlineRole === 'host' && currentQuestion) {
+        if (gameMode === 'online' && onlineRole === 'host' && currentQuestionRef.current) {
           sendOnlineMsg({
             type: 'QUESTION_EXPIRED',
-            questionId: currentQuestion.id,
-            answer: currentQuestion.answer,
-            explanation: currentQuestion.explanation
+            questionId: currentQuestionRef.current.id,
+            answer: currentQuestionRef.current.answer,
+            explanation: currentQuestionRef.current.explanation
           });
         }
 
@@ -1776,13 +2423,14 @@
       };
 
       const submitPlayerAnswer = (playerRole, option) => {
-        if (questionStatus !== 'active' || !currentQuestion) return;
+        if (questionStatusRef.current !== 'active' || !currentQuestionRef.current) return;
+        const q = currentQuestionRef.current;
 
         // In Online Mode (Guest): send submission to authoritative Host
         if (gameMode === 'online' && onlineRole === 'guest') {
           sendOnlineMsg({
             type: 'SUBMIT_ANSWER',
-            questionId: currentQuestion.id,
+            questionId: q.id,
             option,
             playerRole: 'guest'
           });
@@ -1790,8 +2438,14 @@
           return;
         }
 
+        // Track stats for questions answered
+        setStats(prev => ({
+          ...prev,
+          questionsAnswered: (prev.questionsAnswered || 0) + 1
+        }));
+
         // Evaluate answer
-        const isCorrect = (option === currentQuestion.answer);
+        const isCorrect = (option === q.answer);
 
         if (playerRole === 'p1' || (gameMode === 'online' && onlineRole === 'host')) {
           setP1Answer({ option, isCorrect, timestamp: Date.now() });
@@ -1801,9 +2455,15 @@
 
         if (!isCorrect) {
           SoundManager.playError();
-          showToast("Incorrect Answer", "Wrong option. Try again before time expires!");
+          showToast("Incorrect Answer", "Wrong option. Try again before 20s expires!");
           return;
         }
+
+        // Correct answer tracking
+        setStats(prev => ({
+          ...prev,
+          questionsCorrect: (prev.questionsCorrect || 0) + 1
+        }));
 
         // FIRST ACCEPTED CORRECT ANSWER WINS
         clearQuestionTimers();
@@ -1812,44 +2472,49 @@
         const winnerId = playerRole === 'p1' ? 'p1' : 'p2';
         const winSym = (playerRole === 'p1' ? 'X' : 'O');
 
+        questionStatusRef.current = 'resolved';
         setQuestionStatus('resolved');
         setQuestionWinner(winnerId);
         setQuestionWinnerSym(winSym);
         setExplanationVisible(true);
 
-        const perm = { player: winnerId, symbol: winSym, questionId: currentQuestion.id };
+        const perm = { player: winnerId, symbol: winSym, questionId: q.id };
+        movePermissionRef.current = perm;
         setMovePermission(perm);
 
-        const winnerDisplayName = playerRole === 'p1' ? (gameMode === 'friend' ? player1Name : 'You') : (gameMode === 'friend' ? player2Name : 'Player 2');
+        const winnerDisplayName = playerRole === 'p1' ? (gameMode === 'friend' ? player1Name : (currentUser.isGuest ? 'You' : currentUser.username)) : (gameMode === 'friend' ? player2Name : 'Player 2');
         showToast("Question Solved!", `+1 Move Permission granted to ${winnerDisplayName} (${winSym})! Select an open cell.`);
 
         if (gameMode === 'online' && onlineRole === 'host') {
           sendOnlineMsg({
             type: 'QUESTION_RESOLVED',
-            questionId: currentQuestion.id,
+            questionId: q.id,
             winner: 'host',
             winnerSymbol: 'X',
-            answer: currentQuestion.answer,
-            explanation: currentQuestion.explanation
+            answer: q.answer,
+            explanation: q.explanation
           });
         }
       };
 
       const handleAIAnswerSubmission = (targetQuestion, option) => {
-        if (questionStatus !== 'active' || !currentQuestion || currentQuestion.id !== targetQuestion.id) return;
+        // Stale closure protected check via ref
+        if (questionStatusRef.current !== 'active' || !currentQuestionRef.current || currentQuestionRef.current.id !== targetQuestion.id) {
+          return;
+        }
 
         const isCorrect = (option === targetQuestion.answer);
         setAiAnswerState({ isThinking: false, option, isCorrect, timestamp: Date.now() });
 
         if (!isCorrect) {
-          const remaining = Math.max(0, questionDeadline - Date.now());
-          if (remaining > 3500) {
+          const remaining = Math.max(0, questionDeadlineRef.current - Date.now());
+          if (remaining > 4500) {
             aiTimerRef.current = setTimeout(() => {
-              if (questionStatus === 'active') {
+              if (questionStatusRef.current === 'active' && currentQuestionRef.current && currentQuestionRef.current.id === targetQuestion.id) {
                 const retryPlan = AIMLQuestionEngine.simulateAIAnswer(targetQuestion, aiDiff);
                 handleAIAnswerSubmission(targetQuestion, retryPlan.option);
               }
-            }, 3000);
+            }, 3500);
           }
           return;
         }
@@ -1858,12 +2523,14 @@
         clearQuestionTimers();
         SoundManager.playError();
 
+        questionStatusRef.current = 'resolved';
         setQuestionStatus('resolved');
         setQuestionWinner('ai');
         setQuestionWinnerSym(oppSym);
         setExplanationVisible(true);
 
         const perm = { player: 'ai', symbol: oppSym, questionId: targetQuestion.id };
+        movePermissionRef.current = perm;
         setMovePermission(perm);
         showToast("Aether AI Won the Move!", `AI answered Option ${option} correctly and earned the next placement.`);
 
@@ -1876,6 +2543,7 @@
         setBoard(latestBoard => {
           const { winner: checkWin } = GameEngine.checkWinner(latestBoard, boardSize, boardSize);
           if (checkWin || GameEngine.isFull(latestBoard)) {
+            movePermissionRef.current = null;
             setMovePermission(null);
             return latestBoard;
           }
@@ -1886,6 +2554,7 @@
             const updated = [...latestBoard];
             updated[aiMove] = oppSym;
             setMoveHistory(prev => [...prev, { index: aiMove, sym: oppSym }]);
+            movePermissionRef.current = null;
             setMovePermission(null);
 
             const { winner: aiWin, winningLine: aiLine } = GameEngine.checkWinner(updated, boardSize, boardSize);
@@ -1905,60 +2574,44 @@
             return updated;
           }
 
+          movePermissionRef.current = null;
           setMovePermission(null);
           return latestBoard;
         });
       };
 
-      // -------------------------------------------------------------
-      // START MATCH
-      // -------------------------------------------------------------
-      const startMatch = (mode = gameMode, size = 3, diff = aiDiff) => {
-        let targetMode = mode;
-        if (targetMode === 'online' && onlineStatus !== 'connected') {
-          targetMode = 'ai';
-        }
+      // Mode A: Normal AI Move execution (Turn-based, no questions)
+      const executeNormalAIMove = () => {
+        setIsAiThinking(true);
+        setTimeout(() => {
+          setBoard(latestBoard => {
+            const { winner: checkWin } = GameEngine.checkWinner(latestBoard, boardSize, boardSize);
+            if (checkWin || GameEngine.isFull(latestBoard)) {
+              setIsAiThinking(false);
+              return latestBoard;
+            }
 
-        clearQuestionTimers();
-        setGameMode(targetMode);
-        setBoardSize(size);
-        setAiDiff(diff);
-        setBoard(Array(size * size).fill(null));
-        setMoveHistory([]);
-        setTurn('X');
-        setGameStatus('playing');
-        setWinner(null);
-        setWinningLine(null);
-        setShields([]);
-        setActivePowerUp(null);
-        setHintSquare(null);
-        setHintText('');
-        setRematchStatus(null);
-        setMatchElapsedSeconds(0);
-        setIsAiThinking(false);
-        setMovePermission(null);
-        setInventory({ undo: 2, eraser: 2, shield: 2, hint: 3 });
+            const aiMove = MinimaxAI.getMove(latestBoard, boardSize, oppSym, playerSym, aiDiff, boardSize);
+            setIsAiThinking(false);
+            if (aiMove !== -1 && latestBoard[aiMove] === null) {
+              SoundManager.playMove(oppSym === 'X');
+              const updated = [...latestBoard];
+              updated[aiMove] = oppSym;
+              setMoveHistory(prev => [...prev, { index: aiMove, sym: oppSym }]);
 
-        if (targetMode === 'friend') {
-          setPlayerSym('X');
-          setOppSym('O');
-        } else if (targetMode === 'ai') {
-          setPlayerSym('X');
-          setOppSym('O');
-        } else if (targetMode === 'online') {
-          setPlayerSym(onlineRole === 'host' ? 'X' : 'O');
-          setOppSym(onlineRole === 'host' ? 'O' : 'X');
-        }
-
-        setView('play');
-        SoundManager.playClick();
-
-        // MATCH STARTS WITH A QUESTION IMMEDIATELY (NO EXCEPTIONS!)
-        if (targetMode !== 'online' || onlineRole === 'host') {
-          setTimeout(() => {
-            spawnQuestion([]);
-          }, 350);
-        }
+              const { winner: aiWin, winningLine: aiLine } = GameEngine.checkWinner(updated, boardSize, boardSize);
+              if (aiWin) {
+                finishGameOver(aiWin, aiLine, 'ai');
+              } else if (GameEngine.isFull(updated)) {
+                finishGameOver('draw', null, 'ai');
+              } else {
+                setTurn(playerSym);
+              }
+              return updated;
+            }
+            return latestBoard;
+          });
+        }, 500);
       };
 
       // -------------------------------------------------------------
@@ -2300,7 +2953,7 @@
       };
 
       // -------------------------------------------------------------
-      // MOVE HANDLER (INTEGRATED WITH QUESTION BATTLE)
+      // MOVE HANDLER (INTEGRATED WITH QUESTION BATTLE & NORMAL MODE)
       // -------------------------------------------------------------
       const handleRemoteMove = (index, symbol) => {
         setBoard(prevBoard => {
@@ -2310,7 +2963,8 @@
           const newBoard = [...prevBoard];
           newBoard[index] = symbol;
           setMoveHistory(h => [...h, { index, sym: symbol }]);
-          setMovePermission(null); // Move permission consumed
+          movePermissionRef.current = null;
+          setMovePermission(null);
 
           const { winner: winSym, winningLine: line } = GameEngine.checkWinner(newBoard, boardSize, boardSize);
           if (winSym) {
@@ -2319,11 +2973,13 @@
             finishGameOver('draw', null, 'online');
           } else {
             setTurn(symbol === 'X' ? 'O' : 'X');
-            // Host triggers next question automatically
-            if (onlineRole === 'host') {
-              setTimeout(() => {
-                setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
-              }, 800);
+            // In Knowledge Battle mode: Host triggers next question automatically
+            if (activeBattleModeRef.current === 'knowledge_battle') {
+              if (onlineRole === 'host') {
+                setTimeout(() => {
+                  setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+                }, 800);
+              }
             }
           }
 
@@ -2334,30 +2990,48 @@
       const handleCellClick = (index) => {
         if (gameStatus !== 'playing') return;
 
-        // VERIFY MOVE PERMISSION
-        if (!movePermission) {
-          SoundManager.playError();
-          showToast("Move Locked", "Answer the AI/ML Question correctly first to earn a move!");
-          return;
-        }
-
-        // Verify permission ownership
-        if (gameMode === 'ai') {
-          if (movePermission.player !== 'p1') {
+        // MODE B: AI/ML KNOWLEDGE BATTLE MOVE VALIDATION
+        if (activeBattleMode === 'knowledge_battle') {
+          if (!movePermission) {
             SoundManager.playError();
-            showToast("AI Move In Progress", "Aether AI won the question and is executing its move.");
+            showToast("Move Locked", "Answer the AI/ML Question correctly first to earn a move!");
             return;
           }
-        } else if (gameMode === 'online') {
-          const myRole = onlineRole === 'host' ? 'host' : 'guest';
-          if (movePermission.player !== myRole) {
-            SoundManager.playError();
-            showToast("Opponent's Move", "Opponent won the question battle and has the move.");
-            return;
+
+          // Verify permission ownership
+          if (gameMode === 'ai') {
+            if (movePermission.player !== 'p1') {
+              SoundManager.playError();
+              showToast("AI Move In Progress", "Aether AI won the question and is executing its move.");
+              return;
+            }
+          } else if (gameMode === 'online') {
+            const myRole = onlineRole === 'host' ? 'host' : 'guest';
+            if (movePermission.player !== myRole) {
+              SoundManager.playError();
+              showToast("Opponent's Move", "Opponent won the question battle and has the move.");
+              return;
+            }
+          }
+        } else {
+          // MODE A: NORMAL TIC-TAC-TOE TURN VALIDATION
+          if (gameMode === 'ai') {
+            if (turn !== playerSym || isAiThinking) {
+              SoundManager.playError();
+              showToast("AI Calculating", "Wait for Aether AI to complete its turn.");
+              return;
+            }
+          } else if (gameMode === 'online') {
+            const myTurnSym = onlineRole === 'host' ? 'X' : 'O';
+            if (turn !== myTurnSym) {
+              SoundManager.playError();
+              showToast("Opponent's Turn", "Waiting for opponent to place their symbol.");
+              return;
+            }
           }
         }
 
-        // Handle Active Power-Ups
+        // Active Power-Ups
         if (activePowerUp === 'eraser') {
           if (board[index] === null) {
             showToast('Invalid Target', 'Cell is empty. Choose a cell with a symbol.');
@@ -2374,17 +3048,21 @@
           setBoard(next);
           setInventory(inv => ({ ...inv, eraser: Math.max(0, inv.eraser - 1) }));
           setActivePowerUp(null);
+          movePermissionRef.current = null;
           setMovePermission(null);
           SoundManager.playPowerUp();
           showToast('Quantum Eraser', 'Cell symbol has been vaporized!');
-          setTimeout(() => {
-            setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
-          }, 800);
+          if (activeBattleMode === 'knowledge_battle') {
+            setTimeout(() => {
+              setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+            }, 800);
+          }
           return;
         }
 
         if (activePowerUp === 'shield') {
-          if (board[index] !== movePermission.symbol) {
+          const expectedSym = activeBattleMode === 'knowledge_battle' ? movePermission?.symbol : turn;
+          if (board[index] !== expectedSym) {
             showToast('Invalid Target', 'You can only shield your own placed symbols.');
             SoundManager.playError();
             return;
@@ -2392,12 +3070,15 @@
           setShields(prev => [...prev, index]);
           setInventory(inv => ({ ...inv, shield: Math.max(0, inv.shield - 1) }));
           setActivePowerUp(null);
+          movePermissionRef.current = null;
           setMovePermission(null);
           SoundManager.playPowerUp();
           showToast('Aegis Shield', 'Symbol encased in energy barrier!');
-          setTimeout(() => {
-            setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
-          }, 800);
+          if (activeBattleMode === 'knowledge_battle') {
+            setTimeout(() => {
+              setGameStatus(s => { if (s === 'playing') spawnQuestion(); return s; });
+            }, 800);
+          }
           return;
         }
 
@@ -2411,7 +3092,7 @@
         setHintSquare(null);
         setHintText('');
 
-        const movingSymbol = movePermission.symbol;
+        const movingSymbol = activeBattleMode === 'knowledge_battle' ? movePermission.symbol : turn;
         SoundManager.playMove(movingSymbol === 'X');
 
         const newBoard = [...board];
@@ -2420,6 +3101,7 @@
         setMoveHistory(prev => [...prev, { index, sym: movingSymbol }]);
 
         // MOVE PERMISSION CONSUMED
+        movePermissionRef.current = null;
         setMovePermission(null);
 
         if (gameMode === 'online') {
@@ -2439,17 +3121,24 @@
         const nextTurn = movingSymbol === 'X' ? 'O' : 'X';
         setTurn(nextTurn);
 
-        // NEXT QUESTION APPEARS AUTOMATICALLY AFTER MOVE IS EXECUTED
-        setTimeout(() => {
-          setGameStatus(s => {
-            if (s === 'playing') {
-              spawnQuestion();
-            }
-            return s;
-          });
-        }, 800);
+        // NEXT STEP ROUTING BASED ON BATTLE PROTOCOL
+        if (activeBattleMode === 'knowledge_battle') {
+          setTimeout(() => {
+            setGameStatus(s => {
+              if (s === 'playing') {
+                spawnQuestion();
+              }
+              return s;
+            });
+          }, 800);
+        } else if (activeBattleMode === 'normal') {
+          if (gameMode === 'ai' && nextTurn === oppSym) {
+            setTimeout(() => {
+              executeNormalAIMove();
+            }, 500);
+          }
+        }
       };
-
 
       // -------------------------------------------------------------
       // GAME OVER
@@ -2501,16 +3190,18 @@
           }
         }
 
+        const battleTag = activeBattleMode === 'knowledge_battle' ? ' [Knowledge Battle]' : ' [Normal]';
         const newRecord = {
           id: Date.now(),
-          mode: mode === 'friend' ? 'Play with Friend' : mode === 'ai' ? `Vs AI (${aiDiff})` : `Online Room (${roomCode || 'P2P'})`,
+          mode: (mode === 'friend' ? 'Play with Friend' : mode === 'ai' ? `Vs AI (${aiDiff})` : `Online Room (${roomCode || 'P2P'})`) + battleTag,
           opponent: mode === 'friend' ? `${player1Name} vs ${player2Name}` : mode === 'ai' ? `Aether AI` : `Online Player`,
           result: result === 'draw' ? 'Draw' : (mode === 'friend' ? (result === 'X' ? `${player1Name} Won` : `${player2Name} Won`) : (result === playerSym ? 'Victory' : 'Defeat')),
           date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           moves: board.filter(c => c !== null).length + 1
         };
 
-        setMatchHistory(prev => [newRecord, ...prev].slice(0, 50));
+        const updatedHistory = [newRecord, ...matchHistory].slice(0, 50);
+        setMatchHistory(updatedHistory);
 
         setStats(prev => {
           const newMatches = prev.matches + 1;
@@ -2523,19 +3214,12 @@
           const newLevel = 1 + Math.floor(Math.pow(newXP / 150, 0.65));
 
           const updated = {
+            ...prev,
             matches: newMatches, wins: newWins, losses: newLosses, draws: newDraws,
             streak: newStreak, bestStreak: newBestStreak, xp: newXP, level: newLevel
           };
 
-          try {
-            const current = JSON.parse(localStorage.getItem('zero_kaata_save_v1') || localStorage.getItem('beyond_the_grid_save_v2') || '{}');
-            localStorage.setItem('zero_kaata_save_v1', JSON.stringify({
-              ...current,
-              stats: updated,
-              matchHistory: [newRecord, ...matchHistory].slice(0, 50)
-            }));
-          } catch {}
-
+          saveUserData(currentUser, updated, updatedHistory);
           return updated;
         });
       };
@@ -2791,7 +3475,7 @@
             <nav className="nav-links">
               <button className={`nav-btn ${view === 'home' ? 'active' : ''}`} onClick={() => { setView('home'); SoundManager.playClick(); }}>🏠 Home</button>
               <button className={`nav-btn ${view === 'modes' ? 'active' : ''}`} onClick={() => { setView('modes'); SoundManager.playClick(); }}>🎮 Modes</button>
-              <button className={`nav-btn ${view === 'play' ? 'active' : ''}`} onClick={() => { startMatch(gameMode === 'online' && onlineStatus !== 'connected' ? 'ai' : gameMode, boardSize); }}>⚔️ Play</button>
+              <button className={`nav-btn ${view === 'play' ? 'active' : ''}`} onClick={() => { openMatchSetup('ai'); }}>⚔️ Play</button>
               <button className={`nav-btn ${view === 'online_lobby' ? 'active' : ''}`} onClick={() => { setView('online_lobby'); SoundManager.playClick(); }}>🌐 Online Lobby</button>
               <button className={`nav-btn ${view === 'history' ? 'active' : ''}`} onClick={() => { setView('history'); SoundManager.playClick(); }}>📜 Battle History</button>
               <button className={`nav-btn ${view === 'puzzles' ? 'active' : ''}`} onClick={() => { setView('puzzles'); SoundManager.playClick(); }}>🧩 Puzzles</button>
@@ -2799,12 +3483,23 @@
               <button className={`nav-btn ${view === 'audit' ? 'active' : ''}`} onClick={() => { setView('audit'); SoundManager.playClick(); }}>🔍 QA Audit</button>
             </nav>
 
-            {/* Right: User Profile Badge matching Reference Image 1 */}
+            {/* Right: User Profile & Auth Badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div className="user-profile-badge" onClick={() => setShowProfileModal(true)}>
-                <div className="avatar-circle">🥷</div>
+              {currentUser.isGuest ? (
+                <button
+                  className="btn-3d"
+                  style={{ padding: '6px 14px', fontSize: '0.82rem', borderColor: 'var(--color-primary)', background: 'rgba(0, 243, 255, 0.08)' }}
+                  onClick={() => { setAuthTab('login'); setShowAuthModal(true); SoundManager.playClick(); }}
+                >
+                  👤 Guest (Sign In)
+                </button>
+              ) : null}
+              <div className="user-profile-badge" onClick={() => setShowProfileModal(true)} title="View Profile & Stats">
+                <div className="avatar-circle">{currentUser.isGuest ? '👤' : '🥷'}</div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#fff', lineHeight: 1.1 }}>Player1 👑</div>
+                  <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#fff', lineHeight: 1.1 }}>
+                    {currentUser.isGuest ? 'Guest' : currentUser.username} {currentUser.isGuest ? '' : '👑'}
+                  </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--color-primary)' }}>Lv.{stats.level}</div>
                 </div>
                 <span style={{ fontSize: '1.1rem', marginLeft: '4px' }}>🏆</span>
@@ -2832,7 +3527,7 @@
                   </p>
 
                   <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <button className="btn-pill-play" onClick={() => startMatch('ai', 3)}>
+                    <button className="btn-pill-play" onClick={() => openMatchSetup('ai')}>
                       <span>▶</span> PLAY NOW
                     </button>
                     <button className="btn-pill-explore" onClick={() => setView('modes')}>
@@ -2866,8 +3561,8 @@
                     <div className="hero-stat-item">
                       <span className="hero-stat-icon">🎁</span>
                       <div>
-                        <div className="hero-stat-val">0 / 1</div>
-                        <div className="hero-stat-lbl">Daily Challenge</div>
+                        <div className="hero-stat-val">{stats.questionsCorrect || 0}</div>
+                        <div className="hero-stat-lbl">Questions Solved</div>
                       </div>
                     </div>
                   </div>
@@ -2896,7 +3591,7 @@
 
               <div className="modes-grid">
                 {/* Mode 1 */}
-                <div className="card-3d" onClick={() => startMatch('friend', 3)}>
+                <div className="card-3d" onClick={() => openMatchSetup('friend', 3)}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <span style={{ fontSize: '2.5rem' }}>👥</span>
@@ -2904,14 +3599,21 @@
                     </div>
                     <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '6px' }}>Play with Friend</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.5' }}>
-                      Two players take turns on the same device. Customizable names, live turn coin flip, and round score tracker.
+                      Two players take turns on the same device. Select Normal mode for classic turns or Knowledge Battle for question duels.
                     </p>
                   </div>
-                  <button className="btn-3d btn-3d-primary" style={{ width: '100%', marginTop: '14px' }}>Launch Friend Match</button>
+                  <button
+                    type="button"
+                    className="btn-3d btn-3d-primary"
+                    style={{ width: '100%', marginTop: '14px' }}
+                    onClick={(e) => { e.stopPropagation(); openMatchSetup('friend', 3); }}
+                  >
+                    Launch Friend Match
+                  </button>
                 </div>
 
                 {/* Mode 2 */}
-                <div className="card-3d" onClick={() => startMatch('ai', 3)}>
+                <div className="card-3d" onClick={() => openMatchSetup('ai', 3)}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <span style={{ fontSize: '2.5rem' }}>🤖</span>
@@ -2919,10 +3621,17 @@
                     </div>
                     <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '6px' }}>Play with Computer (AI)</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.5' }}>
-                      Solo challenge vs Aether AI. Easy, Medium, Hard, and impossible Minimax with full tactical power-up support.
+                      Solo challenge vs Aether AI. Choose between pure turn-based Minimax or high-stakes 20-second Knowledge Battles.
                     </p>
                   </div>
-                  <button className="btn-3d" style={{ width: '100%', marginTop: '14px' }}>Battle AI Engine</button>
+                  <button
+                    type="button"
+                    className="btn-3d"
+                    style={{ width: '100%', marginTop: '14px' }}
+                    onClick={(e) => { e.stopPropagation(); openMatchSetup('ai', 3); }}
+                  >
+                    Battle AI Engine
+                  </button>
                 </div>
 
                 {/* Mode 3 */}
@@ -2937,7 +3646,14 @@
                       Real-time online room system. Generate a Room Code & 1-click Invite Link to play with anyone across the globe.
                     </p>
                   </div>
-                  <button className="btn-3d btn-3d-primary" style={{ width: '100%', marginTop: '14px' }}>Open Online Lobby</button>
+                  <button
+                    type="button"
+                    className="btn-3d btn-3d-primary"
+                    style={{ width: '100%', marginTop: '14px' }}
+                    onClick={(e) => { e.stopPropagation(); setView('online_lobby'); }}
+                  >
+                    Open Online Lobby
+                  </button>
                 </div>
               </div>
             </main>
@@ -2955,7 +3671,7 @@
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                 {/* Classic */}
-                <div className="card-3d" onClick={() => startMatch('friend', 3)}>
+                <div className="card-3d" onClick={() => openMatchSetup('friend', 3)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '2.4rem' }}>⚔️</span>
                     <span className="mode-badge">CLASSIC</span>
@@ -2964,11 +3680,17 @@
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Play with Friend</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Pass & play on same screen.</p>
                   </div>
-                  <button className="btn-3d btn-3d-primary">Play</button>
+                  <button
+                    type="button"
+                    className="btn-3d btn-3d-primary"
+                    onClick={(e) => { e.stopPropagation(); openMatchSetup('friend', 3); }}
+                  >
+                    Play
+                  </button>
                 </div>
 
                 {/* Vs AI */}
-                <div className="card-3d" onClick={() => startMatch('ai', 3, 'impossible')}>
+                <div className="card-3d" onClick={() => openMatchSetup('ai', 3, 'impossible')}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '2.4rem' }}>🤖</span>
                     <span className="mode-badge">AI</span>
@@ -2977,7 +3699,13 @@
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Vs Computer (AI)</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Impossible Minimax & tactical hints.</p>
                   </div>
-                  <button className="btn-3d">Battle AI</button>
+                  <button
+                    type="button"
+                    className="btn-3d"
+                    onClick={(e) => { e.stopPropagation(); openMatchSetup('ai', 3, 'impossible'); }}
+                  >
+                    Battle AI
+                  </button>
                 </div>
 
                 {/* Online */}
@@ -2990,11 +3718,17 @@
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Invite Online Player</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Share link or room code.</p>
                   </div>
-                  <button className="btn-3d btn-3d-primary">Online Lobby</button>
+                  <button
+                    type="button"
+                    className="btn-3d btn-3d-primary"
+                    onClick={(e) => { e.stopPropagation(); setView('online_lobby'); }}
+                  >
+                    Online Lobby
+                  </button>
                 </div>
 
                 {/* 4x4 Grid */}
-                <div className="card-3d" onClick={() => startMatch('friend', 4)}>
+                <div className="card-3d" onClick={() => openMatchSetup('friend', 4)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '2.4rem' }}>📐</span>
                     <span className="mode-badge">EXTENDED</span>
@@ -3003,7 +3737,13 @@
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Extended 4x4 Grid</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginTop: '4px' }}>Connect 4 in a row to win.</p>
                   </div>
-                  <button className="btn-3d">Play 4x4</button>
+                  <button
+                    type="button"
+                    className="btn-3d"
+                    onClick={(e) => { e.stopPropagation(); openMatchSetup('friend', 4); }}
+                  >
+                    Play 4x4
+                  </button>
                 </div>
 
                 {/* Tactical Puzzles */}
@@ -3177,9 +3917,9 @@
               {/* ==============================================================================
                  AI/ML KNOWLEDGE BATTLE CARD (ANSWER FIRST. PLAY FIRST.)
                  ============================================================================== */}
-              {currentQuestion && (
-                <section className={`question-battle-card ${questionRemainingMs <= 3000 && questionStatus === 'active' ? 'urgency' : ''}`}>
-                  {/* Card Header: Topic Badge & Synchronized 10s Countdown */}
+              {activeBattleMode === 'knowledge_battle' && currentQuestion && (
+                <section className={`question-battle-card ${questionRemainingMs <= 4000 && questionStatus === 'active' ? 'urgency' : ''}`}>
+                  {/* Card Header: Topic Badge & Synchronized 20s Countdown */}
                   <div className="qb-header-row">
                     <div className="qb-topic-badge">
                       <span>🧠 {currentQuestion.topic}</span>
@@ -3187,7 +3927,7 @@
                       <span>{currentQuestion.difficulty}</span>
                     </div>
 
-                    <div className={`qb-timer-pill ${questionRemainingMs <= 3000 && questionStatus === 'active' ? 'urgent' : ''}`}>
+                    <div className={`qb-timer-pill ${questionRemainingMs <= 4000 && questionStatus === 'active' ? 'urgent' : ''}`}>
                       <span>⏱️</span>
                       <span>
                         {questionStatus === 'active'
@@ -3197,13 +3937,13 @@
                     </div>
                   </div>
 
-                  {/* 10-Second Countdown Progress Bar */}
+                  {/* 20-Second Countdown Progress Bar */}
                   <div className="qb-progress-track">
                     <div
-                      className={`qb-progress-fill ${questionRemainingMs <= 3000 ? 'urgent' : ''}`}
+                      className={`qb-progress-fill ${questionRemainingMs <= 4000 ? 'urgent' : ''}`}
                       style={{
                         width: questionStatus === 'active'
-                          ? `${(questionRemainingMs / 10000) * 100}%`
+                          ? `${(questionRemainingMs / AIMLQuestionEngine.QUESTION_DURATION_MS) * 100}%`
                           : (questionStatus === 'resolved' ? '100%' : '0%')
                       }}
                     ></div>
@@ -3376,15 +4116,36 @@
 
                 {/* 3D Board Viewport */}
                 <div className="board-3d-viewport" style={{ padding: '10px 0' }}>
-                  {/* Move Permission Indicator above the Board */}
+                  {/* Move Permission Indicator / Turn Indicator above the Board */}
                   <div style={{ textAlign: 'center', width: '100%', marginBottom: '10px' }}>
-                    {!movePermission ? (
-                      <div className="board-permission-pill locked">
-                        <span>🔒</span> Grid Locked — Answer the AI/ML Question to Earn a Move
-                      </div>
+                    {activeBattleMode === 'knowledge_battle' ? (
+                      !movePermission ? (
+                        <div className="board-permission-pill locked">
+                          <span>🔒</span> Grid Locked — Answer the AI/ML Question to Earn a Move
+                        </div>
+                      ) : (
+                        <div className="board-permission-pill granted">
+                          <span>✨</span> Move Unlocked for {movePermission.player === 'p1' ? (gameMode === 'friend' ? player1Name : (currentUser.isGuest ? 'You' : currentUser.username)) : (movePermission.player === 'ai' ? 'AI' : (gameMode === 'friend' ? player2Name : 'Opponent'))} ({movePermission.symbol}) — Select an open cell!
+                        </div>
+                      )
                     ) : (
+                      /* Mode A: Normal Mode Turn Pill */
                       <div className="board-permission-pill granted">
-                        <span>✨</span> Move Unlocked for {movePermission.player === 'p1' ? (gameMode === 'friend' ? player1Name : 'You') : (movePermission.player === 'ai' ? 'AI' : (gameMode === 'friend' ? player2Name : 'Opponent'))} ({movePermission.symbol}) — Select an open cell!
+                        {gameMode === 'ai' ? (
+                          turn === playerSym ? (
+                            <span>🎮 <strong>Your Turn ({playerSym})</strong> — Select any open cell</span>
+                          ) : (
+                            <span>🤖 <strong>Aether AI is thinking...</strong></span>
+                          )
+                        ) : gameMode === 'friend' ? (
+                          <span>⚔️ <strong>{turn === 'X' ? player1Name : player2Name}'s Turn ({turn})</strong> — Select any open cell</span>
+                        ) : (
+                          turn === (onlineRole === 'host' ? 'X' : 'O') ? (
+                            <span>🌐 <strong>Your Turn ({turn})</strong> — Place your symbol</span>
+                          ) : (
+                            <span>⏳ <strong>Opponent's Turn</strong> — Waiting for remote move</span>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
@@ -3405,7 +4166,7 @@
                               style={{
                                 borderColor: isHinted ? 'var(--color-primary)' : undefined,
                                 boxShadow: isHinted ? 'var(--glow-primary)' : undefined,
-                                cursor: cell ? 'default' : (!movePermission ? 'not-allowed' : 'pointer')
+                                cursor: cell ? 'default' : (activeBattleMode === 'knowledge_battle' && !movePermission ? 'not-allowed' : (activeBattleMode === 'normal' && gameMode === 'ai' && turn !== playerSym ? 'not-allowed' : 'pointer'))
                               }}
                               onClick={() => handleCellClick(idx)}
                             >
@@ -3635,10 +4396,16 @@
 
                 {/* Avatar Banner */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '18px', marginBottom: '20px' }}>
-                  <div className="avatar-circle" style={{ width: '64px', height: '64px', fontSize: '2.2rem' }}>🥷</div>
+                  <div className="avatar-circle" style={{ width: '64px', height: '64px', fontSize: '2.2rem' }}>
+                    {currentUser.isGuest ? '👤' : '🥷'}
+                  </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#fff' }}>Player1 👑</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '8px' }}>Lv.{stats.level} Grid Master</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#fff' }}>
+                      {currentUser.isGuest ? 'Guest Player' : `${currentUser.username} 👑`}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '8px' }}>
+                      {currentUser.isGuest ? 'Guest Session' : `Lv.${stats.level} Grid Master`}
+                    </div>
                     {/* XP Meter */}
                     <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ width: `${(stats.xp % 1000) / 10}%`, height: '100%', background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))' }}></div>
@@ -3668,34 +4435,34 @@
                     <div className="stats-row" style={{ marginBottom: '20px' }}>
                       <div className="stat-card glass-panel"><div className="stat-val">{stats.streak}</div><div className="stat-label">Win Streak</div></div>
                       <div className="stat-card glass-panel"><div className="stat-val">{stats.matches}</div><div className="stat-label">Total Matches</div></div>
-                      <div className="stat-card glass-panel"><div className="stat-val">{stats.matches ? Math.round((stats.wins / stats.matches) * 100) : 68}%</div><div className="stat-label">Win Rate</div></div>
+                      <div className="stat-card glass-panel"><div className="stat-val">{stats.matches > 0 ? Math.round((stats.wins / stats.matches) * 100) : 0}%</div><div className="stat-label">Win Rate</div></div>
                     </div>
 
-                    <h4 style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: '10px' }}>Recent Achievements</h4>
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                      {[
-                        { icon: '⭐', label: 'First Victory' },
-                        { icon: '👑', label: 'Streak Master' },
-                        { icon: '⚡', label: 'Speed Demon' },
-                        { icon: '🔷', label: 'Grandmaster' },
-                        { icon: '🛡️', label: 'Iron Wall' },
-                      ].map((a, i) => (
-                        <div key={i} style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(0, 243, 255, 0.1)', border: '1px solid rgba(0, 243, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }} title={a.label}>
-                          {a.icon}
-                        </div>
-                      ))}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '20px' }}>
+                      <div className="stat-card glass-panel" style={{ padding: '12px' }}><div className="stat-val" style={{ fontSize: '1.2rem', color: 'var(--color-success)' }}>{stats.wins}</div><div className="stat-label">Wins</div></div>
+                      <div className="stat-card glass-panel" style={{ padding: '12px' }}><div className="stat-val" style={{ fontSize: '1.2rem', color: 'var(--color-danger)' }}>{stats.losses}</div><div className="stat-label">Losses</div></div>
+                      <div className="stat-card glass-panel" style={{ padding: '12px' }}><div className="stat-val" style={{ fontSize: '1.2rem', color: 'var(--color-warning)' }}>{stats.draws}</div><div className="stat-label">Draws</div></div>
+                    </div>
+
+                    <h4 style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: '10px' }}>Knowledge Battle Record</h4>
+                    <div className="stats-row" style={{ marginBottom: '16px' }}>
+                      <div className="stat-card glass-panel"><div className="stat-val" style={{ color: 'var(--color-primary)' }}>{stats.questionsAnswered || 0}</div><div className="stat-label">Questions Attempted</div></div>
+                      <div className="stat-card glass-panel"><div className="stat-val" style={{ color: 'var(--color-success)' }}>{stats.questionsCorrect || 0}</div><div className="stat-label">Questions Won</div></div>
                     </div>
                   </div>
                 )}
 
-                {/* Tab: Achievements */}
+                {/* Tab: Achievements (GENUINELY EVALUATED — ZERO HARDCODED UNLOCKS) */}
                 {profileTab === 'achievements' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '280px', overflowY: 'auto' }}>
                     {[
-                      { icon: '⭐', title: 'First Blood', desc: 'Claim your inaugural match victory.', done: true },
-                      { icon: '🔥', title: 'Tactical Dynamo', desc: 'Attain a 5-match winning streak.', done: stats.streak >= 5 },
+                      { icon: '⭐', title: 'First Blood', desc: 'Claim your inaugural match victory.', done: stats.wins >= 1 },
+                      { icon: '🔥', title: 'Tactical Dynamo', desc: 'Attain a 5-match winning streak.', done: stats.bestStreak >= 5 },
+                      { icon: '🧠', title: 'AI/ML Scholar', desc: 'Answer 5 Knowledge Battle questions correctly.', done: (stats.questionsCorrect || 0) >= 5 },
                       { icon: '👑', title: 'Grandmaster', desc: 'Achieve Player Level 10.', done: stats.level >= 10 },
-                      { icon: '🌐', title: 'Network Warrior', desc: 'Complete an online P2P match.', done: true },
+                      { icon: '🌐', title: 'Network Warrior', desc: 'Complete an online P2P match.', done: matchHistory.some(m => m.mode && m.mode.includes('Online')) },
+                      { icon: '🤖', title: 'AI Slayer', desc: 'Defeat the Impossible AI in battle.', done: matchHistory.some(m => m.mode && m.mode.includes('impossible') && (m.result === 'Victory' || m.result.includes('Won'))) },
+                      { icon: '🛡️', title: 'Grid Veteran', desc: 'Complete 10 total matches on the platform.', done: stats.matches >= 10 },
                     ].map((ach, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', borderLeft: ach.done ? '3px solid var(--color-success)' : '3px solid var(--text-muted)' }}>
                         <span style={{ fontSize: '1.6rem' }}>{ach.icon}</span>
@@ -3704,7 +4471,7 @@
                           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{ach.desc}</div>
                         </div>
                         <span style={{ fontWeight: 800, fontSize: '0.75rem', color: ach.done ? 'var(--color-success)' : 'var(--text-muted)' }}>
-                          {ach.done ? 'UNLOCKED' : 'LOCKED'}
+                          {ach.done ? '✓ UNLOCKED' : '🔒 LOCKED'}
                         </span>
                       </div>
                     ))}
@@ -3714,20 +4481,52 @@
                 {/* Tab: History */}
                 {profileTab === 'history' && (
                   <div>
-                    <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                    <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
                       {matchHistory.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>No matches recorded yet.</div>
+                        <div style={{ textAlign: 'center', padding: '30px 20px', color: 'var(--text-muted)' }}>
+                          <span style={{ fontSize: '2rem', display: 'block', marginBottom: '8px' }}>⚔️</span>
+                          No matches recorded yet. Play a match to build history!
+                        </div>
                       ) : (
-                        matchHistory.slice(0, 5).map(m => (
-                          <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
-                            <div><strong>{m.mode}</strong> ({m.opponent})</div>
-                            <div style={{ color: m.result.includes('Won') || m.result === 'Victory' ? 'var(--color-success)' : 'var(--color-danger)' }}>{m.result}</div>
+                        matchHistory.slice(0, 10).map(m => (
+                          <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
+                            <div>
+                              <strong>{m.mode}</strong>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>vs {m.opponent} • {m.date}</div>
+                            </div>
+                            <div style={{ fontWeight: 800, color: m.result.includes('Won') || m.result === 'Victory' ? 'var(--color-success)' : (m.result === 'Draw' ? 'var(--color-warning)' : 'var(--color-danger)') }}>
+                              {m.result}
+                            </div>
                           </div>
                         ))
                       )}
                     </div>
                   </div>
                 )}
+
+                {/* Account Authentication Action Footer */}
+                <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    {currentUser.isGuest ? '👤 Playing as Guest (Temporary local session)' : `Signed in as ${currentUser.username}`}
+                  </div>
+                  {currentUser.isGuest ? (
+                    <button
+                      className="btn-3d btn-3d-primary"
+                      style={{ fontSize: '0.82rem', padding: '6px 14px' }}
+                      onClick={() => { setShowProfileModal(false); setAuthTab('login'); setShowAuthModal(true); SoundManager.playClick(); }}
+                    >
+                      Sign In / Register
+                    </button>
+                  ) : (
+                    <button
+                      className="btn-3d"
+                      style={{ fontSize: '0.82rem', padding: '6px 14px', color: 'var(--color-danger)', borderColor: 'rgba(255, 51, 102, 0.4)' }}
+                      onClick={handleAuthLogout}
+                    >
+                      Sign Out
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -3998,6 +4797,308 @@
                 )}
               </div>
             </main>
+          )}
+
+          {/* ==============================================================================
+             MATCH SETUP DIALOG (ISSUES 2, 3, 4, 5 RESOLUTION)
+             ============================================================================== */}
+          {(showMatchSetupModal || showModeSelectModal) && (
+            <div className="modal-backdrop" onClick={() => { setShowMatchSetupModal(false); setShowModeSelectModal(false); }}>
+              <div className="modal-content glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '640px', padding: '30px' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '2rem' }}>{matchSetupConfig.mode === 'friend' ? '👥' : '🤖'}</span>
+                    <div>
+                      <h3 style={{ fontSize: '1.4rem', fontWeight: 900, margin: 0 }}>
+                        {matchSetupConfig.mode === 'friend' ? 'Pass & Play: Friend Match Setup' : 'Aether AI: Match Setup'}
+                      </h3>
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                        Configure match rules and launch directly into the grid.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="btn-3d" style={{ padding: '6px 12px' }} onClick={() => { setShowMatchSetupModal(false); setShowModeSelectModal(false); }}>✕</button>
+                </div>
+
+                {/* 1. Protocol Selection: Knowledge Battle vs Normal */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                    1. Choose Gameplay Rule Set
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
+                    {/* Knowledge Battle Option */}
+                    <div
+                      onClick={() => setMatchSetupConfig(c => ({ ...c, protocol: 'knowledge_battle' }))}
+                      style={{
+                        padding: '16px',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        background: matchSetupConfig.protocol === 'knowledge_battle' ? 'rgba(0, 243, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                        border: matchSetupConfig.protocol === 'knowledge_battle' ? '2px solid var(--color-primary)' : '1px solid var(--border-subtle)',
+                        boxShadow: matchSetupConfig.protocol === 'knowledge_battle' ? '0 0 20px rgba(0, 243, 255, 0.25)' : 'none',
+                        transition: 'all 0.2s ease',
+                        position: 'relative'
+                      }}
+                    >
+                      {matchSetupConfig.protocol === 'knowledge_battle' && (
+                        <span style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--color-primary)', color: '#000', fontSize: '0.68rem', fontWeight: 900, padding: '2px 8px', borderRadius: '12px' }}>
+                          ✓ SELECTED
+                        </span>
+                      )}
+                      <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>🧠</div>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', marginBottom: '4px' }}>AI/ML Knowledge Battle</div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '6px' }}>
+                        Answer First. Play First. • 20s Timer
+                      </div>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                        A technical AI/ML question spawns before every move. First correct answer earns the turn.
+                      </p>
+                    </div>
+
+                    {/* Normal Tic-Tac-Toe Option */}
+                    <div
+                      onClick={() => setMatchSetupConfig(c => ({ ...c, protocol: 'normal' }))}
+                      style={{
+                        padding: '16px',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        background: matchSetupConfig.protocol === 'normal' ? 'rgba(255, 0, 128, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                        border: matchSetupConfig.protocol === 'normal' ? '2px solid var(--color-secondary)' : '1px solid var(--border-subtle)',
+                        boxShadow: matchSetupConfig.protocol === 'normal' ? '0 0 20px rgba(255, 0, 128, 0.25)' : 'none',
+                        transition: 'all 0.2s ease',
+                        position: 'relative'
+                      }}
+                    >
+                      {matchSetupConfig.protocol === 'normal' && (
+                        <span style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--color-secondary)', color: '#fff', fontSize: '0.68rem', fontWeight: 900, padding: '2px 8px', borderRadius: '12px' }}>
+                          ✓ SELECTED
+                        </span>
+                      )}
+                      <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>⚡</div>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', marginBottom: '4px' }}>Normal Tic-Tac-Toe</div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--color-secondary)', fontWeight: 700, marginBottom: '6px' }}>
+                        Classic Pure Strategy • No Questions
+                      </div>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                        Standard turn alternation (X then O). Rapid moves with zero question pauses.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Specific Configuration per Mode */}
+                {matchSetupConfig.mode === 'friend' ? (
+                  /* Friend Match: Player Names Configuration */
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                      2. Configure Player Names
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '6px' }}>
+                          Player 1 (X)
+                        </label>
+                        <input
+                          type="text"
+                          className="auth-input"
+                          value={matchSetupConfig.p1Name}
+                          onChange={e => setMatchSetupConfig(c => ({ ...c, p1Name: e.target.value }))}
+                          placeholder="Player 1"
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-secondary)', fontWeight: 700, marginBottom: '6px' }}>
+                          Player 2 (O)
+                        </label>
+                        <input
+                          type="text"
+                          className="auth-input"
+                          value={matchSetupConfig.p2Name}
+                          onChange={e => setMatchSetupConfig(c => ({ ...c, p2Name: e.target.value }))}
+                          placeholder="Player 2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* AI Match: AI Difficulty Configuration */
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                      2. Select AI Difficulty
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                      {[
+                        { id: 'easy', label: 'Easy', emoji: '🌱' },
+                        { id: 'medium', label: 'Medium', emoji: '⚔️' },
+                        { id: 'hard', label: 'Hard', emoji: '🔥' },
+                        { id: 'impossible', label: 'Impossible', emoji: '💀' }
+                      ].map(d => (
+                        <button
+                          key={d.id}
+                          type="button"
+                          className={`btn-3d ${matchSetupConfig.diff === d.id ? 'btn-3d-primary' : ''}`}
+                          style={{ padding: '10px 8px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+                          onClick={() => setMatchSetupConfig(c => ({ ...c, diff: d.id }))}
+                        >
+                          <span>{d.emoji}</span>
+                          <span>{d.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Grid Size Selector */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                    3. Grid Board Size
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {[
+                      { size: 3, label: '3x3 Classic' },
+                      { size: 4, label: '4x4 Extended' },
+                      { size: 5, label: '5x5 Grid' }
+                    ].map(g => (
+                      <button
+                        key={g.size}
+                        type="button"
+                        className={`btn-3d ${matchSetupConfig.size === g.size ? 'btn-3d-secondary' : ''}`}
+                        style={{ flex: 1, padding: '10px', fontSize: '0.88rem' }}
+                        onClick={() => setMatchSetupConfig(c => ({ ...c, size: g.size }))}
+                      >
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: '18px' }}>
+                  <button className="btn-3d" style={{ padding: '12px 20px' }} onClick={() => { setShowMatchSetupModal(false); setShowModeSelectModal(false); }}>
+                    Cancel
+                  </button>
+                  <button
+                    className="btn-3d btn-3d-primary"
+                    style={{ padding: '12px 32px', fontSize: '1.05rem', fontWeight: 900 }}
+                    onClick={launchConfiguredMatch}
+                  >
+                    {matchSetupConfig.mode === 'friend' ? '⚔️ Start Friend Match' : '🤖 Start AI Match'} ➔
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==============================================================================
+             AUTHENTICATION MODAL (SIGN IN / REGISTER / GUEST)
+             ============================================================================== */}
+          {showAuthModal && (
+            <div className="modal-backdrop" onClick={() => setShowAuthModal(false)}>
+              <div className="modal-content glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px', padding: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.4rem' }}>🔐</span>
+                    <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>
+                      {authTab === 'login' ? 'Player Sign In' : 'Create Player Account'}
+                    </h3>
+                  </div>
+                  <button className="btn-3d" style={{ padding: '4px 10px' }} onClick={() => setShowAuthModal(false)}>✕</button>
+                </div>
+
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '18px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
+                  <button
+                    type="button"
+                    className={`btn-3d ${authTab === 'login' ? 'btn-3d-primary' : ''}`}
+                    style={{ flex: 1, padding: '8px' }}
+                    onClick={() => { setAuthTab('login'); setAuthError(''); SoundManager.playClick(); }}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn-3d ${authTab === 'register' ? 'btn-3d-primary' : ''}`}
+                    style={{ flex: 1, padding: '8px' }}
+                    onClick={() => { setAuthTab('register'); setAuthError(''); SoundManager.playClick(); }}
+                  >
+                    Register
+                  </button>
+                </div>
+
+                {authError && (
+                  <div style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid var(--color-danger)', color: '#ff6688', padding: '10px 14px', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', marginBottom: '16px' }}>
+                    ⚠️ {authError}
+                  </div>
+                )}
+
+                <form onSubmit={authTab === 'login' ? handleAuthLogin : handleAuthRegister}>
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Username</label>
+                    <input
+                      type="text"
+                      className="auth-input"
+                      placeholder="e.g. NeoCoder"
+                      value={authForm.username}
+                      onChange={e => setAuthForm(prev => ({ ...prev, username: e.target.value }))}
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Password</label>
+                    <input
+                      type="password"
+                      className="auth-input"
+                      placeholder="••••••••"
+                      value={authForm.password}
+                      onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
+                      required
+                    />
+                  </div>
+
+                  {authTab === 'register' && (
+                    <div style={{ marginBottom: '18px' }}>
+                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Confirm Password</label>
+                      <input
+                        type="password"
+                        className="auth-input"
+                        placeholder="••••••••"
+                        value={authForm.confirmPassword}
+                        onChange={e => setAuthForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        required
+                      />
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn-3d btn-3d-primary"
+                    style={{ width: '100%', padding: '12px', fontSize: '1rem', fontWeight: 800, marginTop: '8px' }}
+                  >
+                    {authTab === 'login' ? 'Sign In to Account' : 'Create New Account'}
+                  </button>
+                </form>
+
+                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)' }}>
+                  <button
+                    type="button"
+                    className="btn-3d"
+                    style={{ fontSize: '0.8rem', padding: '6px 14px', background: 'transparent' }}
+                    onClick={() => {
+                      setShowAuthModal(false);
+                      showToast('Guest Session', 'Playing in guest sandbox mode.');
+                    }}
+                  >
+                    Continue as Guest (No Account)
+                  </button>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '8px', lineHeight: 1.3 }}>
+                    🔒 Client-side cryptographic hashing. Each account has isolated storage for stats, achievements, and battle history.
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Toast Notification Container */}

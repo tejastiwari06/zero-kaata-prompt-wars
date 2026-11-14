@@ -289,6 +289,42 @@ export class AuditRunner {
       })
     );
 
+    // 19. 20-Second Knowledge Battle Timer Duration Audit
+    results.push(
+      runTest('aiml_timer_duration', 'Knowledge Battle', 'Configurable 20-Second Question Deadline', () => {
+        if (AIMLQuestionEngine.QUESTION_DURATION_SECONDS !== 20) {
+          throw new Error(`Expected QUESTION_DURATION_SECONDS = 20, got ${AIMLQuestionEngine.QUESTION_DURATION_SECONDS}`);
+        }
+        if (AIMLQuestionEngine.QUESTION_DURATION_MS !== 20000) {
+          throw new Error(`Expected QUESTION_DURATION_MS = 20000, got ${AIMLQuestionEngine.QUESTION_DURATION_MS}`);
+        }
+      })
+    );
+
+    // 20. 4-Tier Difficulty Mix Audit (Easy, Medium, Difficult, Advanced)
+    results.push(
+      runTest('aiml_difficulty_distribution', 'Knowledge Battle', '4-Tier Intelligent Difficulty Mixture (Easy, Medium, Difficult, Advanced)', () => {
+        const tiers = new Set(AIMLQuestionEngine.CURATED_QUESTIONS.map(q => q.difficulty));
+        const requiredTiers = ['Easy', 'Medium', 'Difficult', 'Advanced'];
+        for (const t of requiredTiers) {
+          if (!tiers.has(t as any)) {
+            throw new Error(`Missing required question difficulty tier: ${t}`);
+          }
+        }
+
+        // Sample 50 questions to verify weighted distribution generator executes safely
+        const counts: Record<string, number> = { Easy: 0, Medium: 0, Difficult: 0, Advanced: 0 };
+        for (let i = 0; i < 50; i++) {
+          const q = AIMLQuestionEngine.getNextQuestion([]);
+          counts[q.difficulty] = (counts[q.difficulty] || 0) + 1;
+        }
+
+        if (counts['Easy'] === 0 && counts['Medium'] === 0 && counts['Difficult'] === 0) {
+          throw new Error('Weighted question generator failed to sample expected tiers');
+        }
+      })
+    );
+
     return results;
   }
 }
