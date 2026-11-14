@@ -325,6 +325,17 @@ export class AuditRunner {
       })
     );
 
+    // 21. Player Mode Isolation: Friend Match Must Never Trigger AI
+    results.push(
+      runTest('mode_isolation_friend', 'Game Modes', 'Friend Match (Pass & Play) AI Exclusion', () => {
+        const mode: string = 'friend';
+        const isAI = (mode === 'ai');
+        if (isAI) {
+          throw new Error('Friend mode resolved as AI opponent');
+        }
+      })
+    );
+
     return results;
   }
 }

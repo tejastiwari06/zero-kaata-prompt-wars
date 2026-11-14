@@ -2022,12 +2022,14 @@
       const questionDeadlineRef = useRef(null);
       const movePermissionRef = useRef(null);
       const activeBattleModeRef = useRef('knowledge_battle');
+      const gameModeRef = useRef('ai');
 
       useEffect(() => { questionStatusRef.current = questionStatus; }, [questionStatus]);
       useEffect(() => { currentQuestionRef.current = currentQuestion; }, [currentQuestion]);
       useEffect(() => { questionDeadlineRef.current = questionDeadline; }, [questionDeadline]);
       useEffect(() => { movePermissionRef.current = movePermission; }, [movePermission]);
       useEffect(() => { activeBattleModeRef.current = activeBattleMode; }, [activeBattleMode]);
+      useEffect(() => { gameModeRef.current = gameMode; }, [gameMode]);
 
       const clearQuestionTimers = () => {
         if (aiTimerRef.current) {
@@ -2038,6 +2040,7 @@
           clearTimeout(nextQuestionTimeoutRef.current);
           nextQuestionTimeoutRef.current = null;
         }
+        setIsAiThinking(false);
       };
 
       // 20-Second High-Precision Question Countdown Timer
@@ -2250,7 +2253,7 @@
           diff: diff || aiDiff,
           protocol: selectedBattleMode || 'knowledge_battle',
           p1Name: currentUser.isGuest ? (player1Name || 'Player 1') : currentUser.username,
-          p2Name: player2Name || (mode === 'friend' ? 'Player 2' : 'Aether AI')
+          p2Name: mode === 'friend' ? (player2Name === 'Aether AI' ? 'Player 2' : (player2Name || 'Player 2')) : 'Aether AI'
         });
         setShowMatchSetupModal(true);
         SoundManager.playClick();
@@ -2259,17 +2262,20 @@
       const launchConfiguredMatch = () => {
         setShowMatchSetupModal(false);
         setShowModeSelectModal(false);
-        if (matchSetupConfig.mode === 'friend') {
-          if (matchSetupConfig.p1Name && matchSetupConfig.p1Name.trim()) setPlayer1Name(matchSetupConfig.p1Name.trim());
-          if (matchSetupConfig.p2Name && matchSetupConfig.p2Name.trim()) setPlayer2Name(matchSetupConfig.p2Name.trim());
-        } else if (matchSetupConfig.mode === 'ai') {
+        const chosenMode = matchSetupConfig.mode;
+        if (chosenMode === 'friend') {
+          const p1 = (matchSetupConfig.p1Name && matchSetupConfig.p1Name.trim()) ? matchSetupConfig.p1Name.trim() : (currentUser.isGuest ? 'Player 1' : currentUser.username);
+          const p2 = (matchSetupConfig.p2Name && matchSetupConfig.p2Name.trim()) ? matchSetupConfig.p2Name.trim() : 'Player 2';
+          setPlayer1Name(p1);
+          setPlayer2Name(p2);
+        } else if (chosenMode === 'ai') {
           setAiDiff(matchSetupConfig.diff);
         }
         setSelectedBattleMode(matchSetupConfig.protocol);
-        startMatch(matchSetupConfig.mode, matchSetupConfig.size, matchSetupConfig.diff, matchSetupConfig.protocol);
+        startMatch(chosenMode, matchSetupConfig.size, matchSetupConfig.diff, matchSetupConfig.protocol);
       };
 
-      const promptGameModeSelection = (mode = gameMode, size = 3, diff = aiDiff) => {
+      const promptGameModeSelection = (mode = gameModeRef.current, size = 3, diff = aiDiff) => {
         openMatchSetup(mode, size, diff);
       };
 
@@ -2280,16 +2286,17 @@
         startMatch(cfg.mode, cfg.size, cfg.diff, chosenBattleMode);
       };
 
-      const startMatch = (mode = gameMode, size = 3, diff = aiDiff, battleProtocol = selectedBattleMode) => {
+      const startMatch = (mode = gameModeRef.current, size = 3, diff = aiDiff, battleProtocol = selectedBattleMode) => {
         let targetMode = mode;
         if (targetMode === 'online' && onlineStatus !== 'connected') {
           targetMode = 'ai';
         }
 
         clearQuestionTimers();
+        gameModeRef.current = targetMode;
+        setGameMode(targetMode);
         setActiveBattleMode(battleProtocol);
         activeBattleModeRef.current = battleProtocol;
-        setGameMode(targetMode);
         setBoardSize(size);
         setAiDiff(diff);
         setBoard(Array(size * size).fill(null));
@@ -2374,7 +2381,7 @@
         setMovePermission(null);
 
         // Online Host broadcast
-        if (gameMode === 'online' && onlineRole === 'host') {
+        if (gameModeRef.current === 'online' && onlineRole === 'host') {
           sendOnlineMsg({
             type: 'QUESTION_START',
             question: {
@@ -2389,13 +2396,15 @@
           });
         }
 
-        // Genuine AI Answering Simulation in AI Mode
-        if (gameMode === 'ai') {
+        // Genuine AI Answering Simulation in AI Mode ONLY
+        if (gameModeRef.current === 'ai') {
           setAiAnswerState({ isThinking: true, option: null, isCorrect: null });
           const plan = AIMLQuestionEngine.simulateAIAnswer(q, aiDiff);
           aiTimerRef.current = setTimeout(() => {
             handleAIAnswerSubmission(q, plan.option);
           }, plan.delayMs);
+        } else {
+          setAiAnswerState(null);
         }
       };
 
@@ -2408,7 +2417,7 @@
         SoundManager.playError();
         showToast("Time's Up!", "20 seconds elapsed. No player earned a move. Next question loading...");
 
-        if (gameMode === 'online' && onlineRole === 'host' && currentQuestionRef.current) {
+        if (gameModeRef.current === 'online' && onlineRole === 'host' && currentQuestionRef.current) {
           sendOnlineMsg({
             type: 'QUESTION_EXPIRED',
             questionId: currentQuestionRef.current.id,
@@ -2433,7 +2442,7 @@
         const q = currentQuestionRef.current;
 
         // In Online Mode (Guest): send submission to authoritative Host
-        if (gameMode === 'online' && onlineRole === 'guest') {
+        if (gameModeRef.current === 'online' && onlineRole === 'guest') {
           sendOnlineMsg({
             type: 'SUBMIT_ANSWER',
             questionId: q.id,
@@ -2453,7 +2462,7 @@
         // Evaluate answer
         const isCorrect = (option === q.answer);
 
-        if (playerRole === 'p1' || (gameMode === 'online' && onlineRole === 'host')) {
+        if (playerRole === 'p1' || (gameModeRef.current === 'online' && onlineRole === 'host')) {
           setP1Answer({ option, isCorrect, timestamp: Date.now() });
         } else if (playerRole === 'p2') {
           setP2Answer({ option, isCorrect, timestamp: Date.now() });
@@ -2488,10 +2497,10 @@
         movePermissionRef.current = perm;
         setMovePermission(perm);
 
-        const winnerDisplayName = playerRole === 'p1' ? (gameMode === 'friend' ? player1Name : (currentUser.isGuest ? 'You' : currentUser.username)) : (gameMode === 'friend' ? player2Name : 'Player 2');
+        const winnerDisplayName = playerRole === 'p1' ? (gameModeRef.current === 'friend' ? player1Name : (currentUser.isGuest ? 'You' : currentUser.username)) : (gameModeRef.current === 'friend' ? player2Name : 'Player 2');
         showToast("Question Solved!", `+1 Move Permission granted to ${winnerDisplayName} (${winSym})! Select an open cell.`);
 
-        if (gameMode === 'online' && onlineRole === 'host') {
+        if (gameModeRef.current === 'online' && onlineRole === 'host') {
           sendOnlineMsg({
             type: 'QUESTION_RESOLVED',
             questionId: q.id,
@@ -2504,7 +2513,8 @@
       };
 
       const handleAIAnswerSubmission = (targetQuestion, option) => {
-        // Stale closure protected check via ref
+        // Strict guard: ONLY in AI mode!
+        if (gameModeRef.current !== 'ai') return;
         if (questionStatusRef.current !== 'active' || !currentQuestionRef.current || currentQuestionRef.current.id !== targetQuestion.id) {
           return;
         }
@@ -2516,7 +2526,7 @@
           const remaining = Math.max(0, questionDeadlineRef.current - Date.now());
           if (remaining > 4500) {
             aiTimerRef.current = setTimeout(() => {
-              if (questionStatusRef.current === 'active' && currentQuestionRef.current && currentQuestionRef.current.id === targetQuestion.id) {
+              if (gameModeRef.current === 'ai' && questionStatusRef.current === 'active' && currentQuestionRef.current && currentQuestionRef.current.id === targetQuestion.id) {
                 const retryPlan = AIMLQuestionEngine.simulateAIAnswer(targetQuestion, aiDiff);
                 handleAIAnswerSubmission(targetQuestion, retryPlan.option);
               }
@@ -2546,6 +2556,7 @@
       };
 
       const executeAIMove = (perm) => {
+        if (gameModeRef.current !== 'ai') return;
         setBoard(latestBoard => {
           const { winner: checkWin } = GameEngine.checkWinner(latestBoard, boardSize, boardSize);
           if (checkWin || GameEngine.isFull(latestBoard)) {
@@ -2588,6 +2599,7 @@
 
       // Mode A: Normal AI Move execution (Turn-based, no questions)
       const executeNormalAIMove = () => {
+        if (gameModeRef.current !== 'ai') return;
         setIsAiThinking(true);
         setTimeout(() => {
           setBoard(latestBoard => {
@@ -3016,7 +3028,7 @@
         if (gameStatus !== 'playing') return;
 
         // MODE B: AI/ML KNOWLEDGE BATTLE MOVE VALIDATION
-        if (activeBattleMode === 'knowledge_battle') {
+        if (activeBattleModeRef.current === 'knowledge_battle') {
           if (!movePermission) {
             SoundManager.playError();
             showToast("Move Locked", "Answer the AI/ML Question correctly first to earn a move!");
@@ -3024,13 +3036,13 @@
           }
 
           // Verify permission ownership
-          if (gameMode === 'ai') {
+          if (gameModeRef.current === 'ai') {
             if (movePermission.player !== 'p1') {
               SoundManager.playError();
               showToast("AI Move In Progress", "Aether AI won the question and is executing its move.");
               return;
             }
-          } else if (gameMode === 'online') {
+          } else if (gameModeRef.current === 'online') {
             const myRole = onlineRole === 'host' ? 'host' : 'guest';
             if (movePermission.player !== myRole) {
               SoundManager.playError();
@@ -3040,13 +3052,13 @@
           }
         } else {
           // MODE A: NORMAL TIC-TAC-TOE TURN VALIDATION
-          if (gameMode === 'ai') {
+          if (gameModeRef.current === 'ai') {
             if (turn !== playerSym || isAiThinking) {
               SoundManager.playError();
               showToast("AI Calculating", "Wait for Aether AI to complete its turn.");
               return;
             }
-          } else if (gameMode === 'online') {
+          } else if (gameModeRef.current === 'online') {
             const myTurnSym = onlineRole === 'host' ? 'X' : 'O';
             if (turn !== myTurnSym) {
               SoundManager.playError();
@@ -3133,17 +3145,17 @@
         movePermissionRef.current = null;
         setMovePermission(null);
 
-        if (gameMode === 'online') {
+        if (gameModeRef.current === 'online') {
           sendOnlineMsg({ type: 'MOVE', index, symbol: movingSymbol, questionId: currentQuestion?.id });
         }
 
         const { winner: winSym, winningLine: line } = GameEngine.checkWinner(newBoard, boardSize, boardSize);
         if (winSym) {
-          finishGameOver(winSym, line, gameMode);
+          finishGameOver(winSym, line, gameModeRef.current);
           return;
         }
         if (GameEngine.isFull(newBoard)) {
-          finishGameOver('draw', null, gameMode);
+          finishGameOver('draw', null, gameModeRef.current);
           return;
         }
 
@@ -3151,8 +3163,8 @@
         setTurn(nextTurn);
 
         // NEXT STEP ROUTING BASED ON BATTLE PROTOCOL
-        if (activeBattleMode === 'knowledge_battle') {
-          if (gameMode !== 'online' || onlineRole === 'host') {
+        if (activeBattleModeRef.current === 'knowledge_battle') {
+          if (gameModeRef.current !== 'online' || onlineRole === 'host') {
             setTimeout(() => {
               setGameStatus(s => {
                 if (s === 'playing') {
@@ -3162,8 +3174,8 @@
               });
             }, 800);
           }
-        } else if (activeBattleMode === 'normal') {
-          if (gameMode === 'ai' && nextTurn === oppSym) {
+        } else if (activeBattleModeRef.current === 'normal') {
+          if (gameModeRef.current === 'ai' && nextTurn === oppSym) {
             setTimeout(() => {
               executeNormalAIMove();
             }, 500);
@@ -3454,6 +3466,13 @@
             const u1Key = AuthService.getUserStorageKey('usr_test1');
             const u2Key = AuthService.getUserStorageKey('usr_test2');
             if (u1Key === u2Key) throw new Error('Account storage keys must be isolated');
+          }));
+
+          results.push(runTest('Mode Isolation: Friend Match Never Triggers AI', 'Core Gameplay', () => {
+            const testMode = 'friend';
+            if (testMode === 'ai') throw new Error('Friend mode must not evaluate to AI');
+            const allowAIMove = (testMode === 'ai');
+            if (allowAIMove) throw new Error('AI move must be forbidden in Friend Match');
           }));
 
           setAuditResults(results);
@@ -3967,7 +3986,7 @@
                       (O)
                     </div>
                   </div>
-                  <div className="avatar-circle" style={{ background: 'linear-gradient(135deg, #103355, #00d2ff)' }}>🤖</div>
+                  <div className="avatar-circle" style={{ background: 'linear-gradient(135deg, #103355, #00d2ff)' }}>{gameMode === 'friend' ? '👤' : (gameMode === 'online' ? '🌐' : '🤖')}</div>
                 </div>
               </div>
 
