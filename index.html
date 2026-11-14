@@ -571,6 +571,504 @@
       box-shadow: 0 0 16px rgba(0, 255, 170, 0.3);
     }
 
+    /* ==============================================================================
+       COMPREHENSIVE RESPONSIVE ALIGNMENT & VIEWPORT ADAPTATION ENGINE
+       Breakpoints: 320px-375px (Small Mobile), 376px-430px (Standard Mobile),
+       431px-600px (Large Mobile), 601px-1024px (Tablets / Laptops), 1024px+ (Desktop)
+       ============================================================================== */
+
+    /* Global Overflow Prevention & Touch Optimization */
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    button, .btn-3d, .btn-pill-play, .btn-pill-explore, .nav-btn, .qb-option-btn, .side-dock-btn, .reaction-emoji-btn {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .auth-input {
+      font-size: 16px; /* Prevents auto-zoom on iOS mobile browsers */
+    }
+
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .stat-card {
+      padding: 14px 12px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    .stat-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .board-permission-pill {
+      max-width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    /* Symbol Centering & Dynamic Responsive Sizing */
+    .classic-board-grid .grid-cell-3d {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .classic-board-grid.size-3 .neon-tube-x,
+    .classic-board-grid.size-3 .neon-tube-o,
+    .classic-board-grid.size-3 .symbol-3d-x,
+    .classic-board-grid.size-3 .symbol-3d-o {
+      font-size: clamp(1.8rem, 8vw, 3.4rem);
+    }
+
+    .classic-board-grid.size-4 .neon-tube-x,
+    .classic-board-grid.size-4 .neon-tube-o,
+    .classic-board-grid.size-4 .symbol-3d-x,
+    .classic-board-grid.size-4 .symbol-3d-o {
+      font-size: clamp(1.3rem, 5.5vw, 2.3rem);
+    }
+
+    .classic-board-grid.size-5 .neon-tube-x,
+    .classic-board-grid.size-5 .neon-tube-o,
+    .classic-board-grid.size-5 .symbol-3d-x,
+    .classic-board-grid.size-5 .symbol-3d-o {
+      font-size: clamp(1rem, 4vw, 1.7rem);
+    }
+
+    /* Table Container Overflow Guard */
+    main .glass-panel {
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* --- BREAKPOINT 1: Tablets & Mid Screens (<= 1024px) --- */
+    @media (max-width: 1024px) {
+      .app-container {
+        padding: 14px 18px 36px;
+      }
+      .nav-bar {
+        padding: 10px 18px;
+        gap: 12px;
+      }
+      .hero-banner-card {
+        padding: 32px 24px;
+        gap: 24px;
+      }
+      .arena-container {
+        max-width: 720px;
+      }
+    }
+
+    /* --- BREAKPOINT 2: Standard Tablets & Large Phones (<= 768px) --- */
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 10px 14px 30px;
+      }
+
+      /* Navbar Stack: Logo & Badge on top, scrollable navigation pills beneath */
+      .nav-bar {
+        padding: 8px 12px;
+        top: 0;
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+        position: sticky;
+      }
+      .brand-logo-container {
+        gap: 8px;
+      }
+      .brand-logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1.1rem;
+      }
+      .brand-logo-text {
+        font-size: 1.18rem;
+      }
+      .nav-links {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 4px 0 2px;
+        gap: 6px;
+        scrollbar-width: none;
+      }
+      .nav-links::-webkit-scrollbar {
+        display: none;
+      }
+      .nav-btn {
+        padding: 7px 12px;
+        font-size: 0.82rem;
+        min-height: 36px;
+      }
+      .user-profile-badge {
+        padding: 4px 10px 4px 6px;
+        gap: 8px;
+      }
+      .avatar-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 0.95rem;
+      }
+
+      /* Hero Section */
+      .hero-banner-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px 16px;
+        gap: 20px;
+      }
+      .hero-banner-card > div:first-child {
+        flex: 1 1 auto !important;
+        width: 100%;
+      }
+      .hero-floating-board {
+        width: min(280px, 80vw);
+        height: min(280px, 80vw);
+        margin: 0 auto;
+        transform: scale(0.92);
+      }
+      .hero-floating-board .grid-cell-3d {
+        height: auto !important;
+        aspect-ratio: 1 / 1;
+      }
+      .hero-stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .hero-stat-item {
+        padding: 10px 12px;
+        min-width: 0;
+      }
+      .hero-stat-val {
+        font-size: 1.15rem;
+      }
+      .hero-stat-lbl {
+        font-size: 0.7rem;
+      }
+
+      /* Active Match Arena */
+      .arena-stage-row {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+      }
+      .side-action-dock {
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        order: 2;
+      }
+      .side-dock-btn {
+        min-height: 44px;
+        min-width: 58px;
+        padding: 8px 10px;
+        flex: 1;
+        max-width: 100px;
+      }
+      .board-3d-viewport {
+        order: 1;
+        padding: 8px 0 14px;
+      }
+      .arena-top-bar {
+        grid-template-columns: 1fr auto 1fr;
+        gap: 8px;
+        width: 100%;
+      }
+      .arena-player-card {
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .arena-timer-pill {
+        padding: 6px 12px;
+      }
+      .arena-timer-val {
+        font-size: 1rem;
+      }
+    }
+
+    /* --- BREAKPOINT 3: Large Phones & Phablets (<= 640px) --- */
+    @media (max-width: 640px) {
+      .modes-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .card-3d {
+        padding: 20px 16px;
+      }
+      .question-battle-card {
+        padding: 14px 12px;
+      }
+      .qb-header-row {
+        gap: 8px;
+      }
+      .qb-question-text {
+        font-size: 0.94rem;
+        line-height: 1.45;
+        margin-bottom: 12px;
+      }
+      .qb-options-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .qb-option-btn {
+        min-height: 44px;
+        padding: 10px 12px;
+        font-size: 0.84rem;
+      }
+      .qb-dual-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      /* Modal adjustments */
+      .modal-backdrop {
+        padding: 10px;
+      }
+      .modal-content {
+        padding: 20px 14px !important;
+        margin: auto;
+        max-height: 92vh;
+      }
+      .victory-banner-card,
+      .defeat-modal-card,
+      .draw-modal-card {
+        padding: 24px 16px;
+      }
+      .golden-crown-icon {
+        font-size: 2.8rem;
+      }
+      .golden-victory-title,
+      .defeat-title,
+      .draw-title {
+        font-size: clamp(1.8rem, 7vw, 2.4rem);
+      }
+      .golden-victory-sub {
+        font-size: 0.92rem;
+        margin-bottom: 16px;
+      }
+      .victory-stats-grid {
+        gap: 8px;
+        padding: 10px 6px;
+        margin-bottom: 18px;
+      }
+      .victory-stat-val {
+        font-size: 1.05rem;
+      }
+      .victory-stat-lbl {
+        font-size: 0.66rem;
+      }
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .stat-card {
+        padding: 10px 8px;
+      }
+      .stat-val {
+        font-size: 1.18rem;
+      }
+      .stat-label {
+        font-size: 0.68rem;
+      }
+    }
+
+    /* --- BREAKPOINT 4: Standard Mobile Phones (<= 480px) --- */
+    @media (max-width: 480px) {
+      .app-container {
+        padding: 8px 10px 24px;
+      }
+      .brand-logo-text {
+        font-size: 1.05rem;
+      }
+      .user-profile-badge {
+        padding: 3px 8px 3px 5px;
+      }
+      .arena-top-bar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .arena-timer-pill {
+        order: -1;
+        width: fit-content;
+        margin: 0 auto;
+      }
+      .arena-player-card {
+        justify-content: center !important;
+        text-align: center !important;
+      }
+      .board-3d-stage {
+        max-width: min(90vw, 350px);
+      }
+      .board-3d-base {
+        padding: 12px;
+      }
+      .classic-board-grid {
+        gap: 8px;
+      }
+      .classic-board-grid.size-4 {
+        gap: 6px;
+      }
+      .classic-board-grid.size-5 {
+        gap: 4px;
+      }
+      .board-permission-pill {
+        font-size: 0.76rem;
+        padding: 6px 12px;
+      }
+      .qb-topic-badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+      }
+      .qb-timer-pill {
+        font-size: 0.82rem;
+        padding: 4px 10px;
+      }
+      .qb-player-station {
+        padding: 8px;
+      }
+      .qb-player-station div[style*="gridTemplateColumns"] {
+        grid-template-columns: 1fr !important;
+      }
+      .modal-content {
+        padding: 16px 12px !important;
+      }
+    }
+
+    /* --- BREAKPOINT 5: Small Mobile Phones (320px - 375px) --- */
+    @media (max-width: 375px) {
+      .hero-floating-board {
+        width: min(240px, 78vw);
+        height: min(240px, 78vw);
+        transform: scale(0.85);
+      }
+      .hero-stats-bar {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .hero-stat-item {
+        padding: 8px;
+      }
+      .hero-stat-icon {
+        font-size: 1.3rem;
+      }
+      .hero-stat-val {
+        font-size: 1rem;
+      }
+      .btn-pill-play {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+        width: 100%;
+        justify-content: center;
+      }
+      .btn-pill-explore {
+        padding: 12px 18px;
+        font-size: 0.86rem;
+        width: 100%;
+        justify-content: center;
+      }
+      .board-3d-stage {
+        max-width: min(88vw, 290px);
+      }
+      .board-3d-base {
+        padding: 8px;
+      }
+      .side-dock-btn {
+        min-width: 50px;
+        padding: 6px 6px;
+        font-size: 0.7rem;
+      }
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+    }
+
+    /* --- BREAKPOINT 6: Mobile Landscape Mode (max-height <= 500px) --- */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .nav-bar {
+        position: relative;
+        top: 0;
+        margin-bottom: 8px;
+        padding: 6px 12px;
+      }
+      .arena-stage-row {
+        flex-direction: row;
+        gap: 12px;
+        align-items: center;
+      }
+      .board-3d-stage {
+        max-width: min(55vh, 300px);
+      }
+      .side-action-dock {
+        flex-direction: column;
+        width: auto;
+      }
+      .modal-content {
+        max-height: 88vh;
+        padding: 14px 16px !important;
+      }
+      .question-battle-card {
+        padding: 10px 14px;
+        margin-bottom: 8px;
+      }
+      .qb-question-text {
+        margin-bottom: 8px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -4899,7 +5397,7 @@
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                     1. Choose Gameplay Rule Set
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
+                  <div className="setup-proto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
                     {/* Knowledge Battle Option */}
                     <div
                       onClick={() => setMatchSetupConfig(c => ({ ...c, protocol: 'knowledge_battle' }))}
@@ -4967,7 +5465,7 @@
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                       2. Configure Player Names
                     </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="setup-names-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                       <div>
                         <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '6px' }}>
                           Player 1 (X)
@@ -5000,7 +5498,7 @@
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                       2. Select AI Difficulty
                     </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                    <div className="setup-diff-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                       {[
                         { id: 'easy', label: 'Easy', emoji: '🌱' },
                         { id: 'medium', label: 'Medium', emoji: '⚔️' },
@@ -5027,7 +5525,7 @@
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                     3. Grid Board Size
                   </label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div className="setup-size-grid" style={{ display: 'flex', gap: '10px' }}>
                     {[
                       { size: 3, label: '3x3 Classic' },
                       { size: 4, label: '4x4 Extended' },
@@ -5047,7 +5545,7 @@
                 </div>
 
                 {/* Action Buttons */}
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: '18px' }}>
+                <div className="modal-action-row" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: '18px' }}>
                   <button className="btn-3d" style={{ padding: '12px 20px' }} onClick={() => { setShowMatchSetupModal(false); setShowModeSelectModal(false); }}>
                     Cancel
                   </button>
